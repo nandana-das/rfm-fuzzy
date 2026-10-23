@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+# Raw UCI data: fetch with scripts/fetch_data.py (not redistributed here)
+data/raw/
