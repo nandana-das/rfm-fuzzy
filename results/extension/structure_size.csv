@@ -1,0 +1,4 @@
+method,n_concepts,n_frequent,n_rules_conf60,mean_intent_size_frequent,share_customers_partial_membership
+C-fca,208,51,17,1.7647058823529411,0.0
+F-fca,3841,2649,8714,2.371083427708569,0.7415787682885335
+F-fca-G,3635,378,4727,1.5648148148148149,0.7415787682885335
