@@ -1,0 +1,2 @@
+context_change_crisp_mean,context_change_fuzzy_mean,diff_mean,diff_min,diff_max,replicates_fuzzy_lower,n_replicates,share_crisp_cell_changed_mean,concept_change_C-fca_mean,concept_change_F-fca_mean,concept_change_F-fca-G_mean
+0.052432117137898485,0.047908062807472736,-0.0045240543304257445,-0.008078891380599161,-0.0008770416379111981,20,20,0.12338626890575025,0.013374254182355239,0.008140400135594443,0.011944778752127096
