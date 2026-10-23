@@ -28,6 +28,8 @@ TIE_SPECS = {
     "F-fca-core-T": ("fuzzy-tie", 3, "lukasiewicz"),
     "F-fca-G-core-T": ("fuzzy-tie", 3, "godel"),
 }
+# Plan addendum E: hybrid = segment features + log-RFM.
+HYBRIDS = {"HYB-fca": "F-fca-core", "HYB-ctx": "F-ctx", "HYB-cfca": "C-fca"}
 
 
 def _context(kind, ranks, intervals=None):
@@ -58,6 +60,11 @@ def build_features(train_rfm, test_rfm, methods=METHODS, min_support=MIN_SUPPORT
             cols = ["recency_days", "transaction_count", "amount"]
             out[m] = (np.log1p(train_rfm[cols].to_numpy(float)),
                       np.log1p(test_rfm[cols].to_numpy(float)), {})
+        elif m in HYBRIDS:
+            # Plan addendum E: segment features plus the three log-RFM values.
+            parts = build_features(train_rfm, test_rfm, (HYBRIDS[m], "logRFM"), min_support)
+            seg, log = parts[HYBRIDS[m]], parts["logRFM"]
+            out[m] = (np.hstack([seg[0], log[0]]), np.hstack([seg[1], log[1]]), seg[2])
         else:
             support_kind = "core" if (m in CORE_SPECS or m in TIE_SPECS) else "sigma"
             kind, n_levels, residuum = {**LATTICE_SPECS, **CORE_SPECS, **TIE_SPECS}[m]

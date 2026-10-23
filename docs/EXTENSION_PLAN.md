@@ -247,3 +247,23 @@ comparisons, settings, metrics, direction, Holm over five), and D4a, D4b identic
   spend R² is the more informative target.
 - The tie-aware variant changes 0–0.1 % of customers here, so it is **not** tested on this
   dataset (it cannot be confirmed where it does nothing).
+
+---
+
+## Addendum E (2026-10-23): hybrid of fuzzy concepts and log-RFM
+
+Written and committed **before** any hybrid result was computed. **Exploratory**: designed
+after all three datasets showed that continuous log-RFM often matches or beats every
+segment representation, and run on those same datasets.
+
+**Question.** Do fuzzy concept memberships add predictive information *on top of* the
+exact R, F, M values?
+
+**Methods** (tuned regularisation only, same origins, folds, models and bootstrap as before):
+`HYB-fca` = F-fca-core degrees + log1p(R, F, M); `HYB-ctx` = F-ctx memberships + log1p(R, F, M);
+`HYB-cfca` = C-fca indicators + log1p(R, F, M) (the base-paper lattice in the same hybrid);
+plus F-fca-core and logRFM for reference.
+
+**Comparisons** (two-sided, per dataset, Holm over the six tests within a dataset):
+E1 HYB-fca − logRFM (AUC, R²); E2 HYB-fca − HYB-cfca (AUC, R²); E3 HYB-fca − HYB-ctx (AUC, R²).
+All three datasets reported, whatever the direction.
