@@ -186,11 +186,14 @@ class FuzzyConceptLattice:
                 conf = self.core_support[j] / self.core_support[i]
                 if conf >= min_confidence:
                     rows.append({"premise": self.label(self.intents[i]),
+                                 "premise_levels": "".join(map(str, self.intents[i])),
+                                 "consequent_levels": "".join(map(str, self.intents[j])),
                                  "premise_core_count": self.core_support[i] * self.n_objects,
                                  "consequent_intent": self.label(self.intents[j]),
                                  "rule_core_count": self.core_support[j] * self.n_objects,
                                  "confidence": conf})
-        cols = ["premise", "premise_core_count", "consequent_intent", "rule_core_count", "confidence"]
+        cols = ["premise", "premise_core_count", "consequent_intent", "rule_core_count", "confidence",
+                "premise_levels", "consequent_levels"]
         return pd.DataFrame(rows, columns=cols).sort_values("confidence", ascending=False, ignore_index=True)
 
     def label(self, intent):
