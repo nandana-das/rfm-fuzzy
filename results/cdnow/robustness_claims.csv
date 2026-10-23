@@ -1,0 +1,3 @@
+claim,measure,fuzzy_mean,crisp_mean,replicates_fuzzy_lower,n_replicates,replicates
+B4a,context change F-ctx vs C-ctx,0.03208305049267885,0.034122703060845604,20,20,True
+B4b,concept change F-fca-core vs C-fca,0.007597220301761791,0.008682557828979701,20,20,True
