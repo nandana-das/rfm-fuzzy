@@ -21,6 +21,11 @@ and association rules off the concept lattice. Its stated future work is a
   - The pre-registered fuzzy lattice predicted *worse* than the crisp lattice
     (overfitting: ~2,600 concepts vs ~50). With tuned regularisation (exploratory) it
     is slightly better than the crisp lattice, but not better than the fuzzy memberships alone.
+- [x] **Addendum A: core-support threshold** (share of customers *fully* in a concept).
+  It cuts the Łukasiewicz lattice from 2,649 to 208 frequent concepts and gives readable
+  boundary-aware rules (e.g. {M5} ⇒ {½/F5, M5}, 0.86). Still worse than crisp FCA at the planned
+  fixed regularisation. With tuned regularisation it beats crisp FCA (AUC +0.006, R² +0.009) and is
+  the best method on spend R², a second-stage result that needs another dataset.
 
 ## Layout
 
