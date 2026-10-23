@@ -132,3 +132,45 @@ secondary), compared with C-fca, C-ctx and F-ctx as defined above.
   Jaccard stability of the core-frequent intent set (50 samples) vs crisp.
 
 All numbers will be reported whatever their direction.
+
+---
+
+## Addendum B (2026-10-23): confirmation on CDNOW
+
+Written and committed **before** any outcome-based analysis of CDNOW. Done beforehand
+(structure and base rates only): row/customer counts, band occupancy, lattice sizes and
+build times at the four cutoffs below, and the share of customers who buy in each horizon.
+
+**Data.** CDNOW master (Fader & Hardie): 23,570 customers who first bought in Q1 1997,
+69,659 purchase rows to 1998-06-30. Each purchase row is treated as one invoice line;
+frequency = purchase rows, monetary = summed dollar value. Zero-value rows are kept and
+zero-spend customers dropped, as for Online Retail II.
+
+**Method.** Exactly as in the main plan and Addendum A, no changes. In particular, ties
+keep their mid-rank. Known consequence (seen in the feasibility check): 52–65 % of customers
+have one purchase, so F1 and F3 are empty and fuzzy partial memberships on F are rare;
+fuzzification acts mainly on R and M. This makes CDNOW a conservative test.
+
+**Design.** Cutoffs 1997-07-01, 1997-10-01, 1998-01-01, 1998-04-01; 90-day horizons;
+customers with positive spend before the cutoff (~23,500). Same targets, models, 5-fold CV,
+fold-wise fitting, fixed (C = 1, α = 1) and tuned (inner 3-fold CV, 10⁻⁴…10²) settings,
+and the same paired bootstrap. Methods: C-ctx, C-fca, F-ctx, F-fca-core, F-fca-G-core,
+logRFM. (The sigma-count F-fca is not carried forward.)
+
+**Confirmatory claims** (each replicates if the difference has the Online Retail II sign
+and Holm-adjusted p < 0.05 over the five tests):
+
+| # | Claim | Setting | Metric |
+|---|---|---|---|
+| B1a | F-ctx > C-ctx | fixed | AUC |
+| B1b | F-ctx > C-ctx | fixed | R² |
+| B2a | F-fca-core > C-fca | tuned | AUC |
+| B2b | F-fca-core > C-fca | tuned | R² |
+| B3 | F-fca-core > F-ctx | tuned | R² |
+
+**Robustness claims** (replicate if fuzzy is lower in all 20 invoice-drop replicates, p = 0.05):
+B4a context-level change, F-ctx vs C-ctx; B4b concept-degree change, F-fca-core vs C-fca.
+
+**Descriptive:** all other method comparisons in both settings, concept counts, rules
+≥ 0.60 among core-frequent concepts, bootstrap Jaccard stability (50 samples) of the
+frequent sets, band occupancy per cutoff.

@@ -13,7 +13,7 @@ code ran. Data: UCI Online Retail II (see [REPLICATION.md](REPLICATION.md)).
 | **H3** structure size and stability (descriptive) | Fuzzy lattices are 17–18× larger (3,841 / 3,635 vs 208 concepts). Their frequent-concept sets are slightly *more* stable under bootstrap (Jaccard 0.946 / 0.945 vs 0.932) with far lower variance |
 | **A1** (addendum) core-support fuzzy FCA predicts better than crisp FCA | **Rejected at fixed regularisation** (AUC −0.007, R² −0.009; Holm p = 0.002 / 0.004). **With tuned regularisation (pre-specified secondary)** it beats crisp FCA (AUC +0.006, R² +0.009, 4/4 origins) and, on R² only, also the fuzzy memberships (+0.004, 4/4, p = 0.006) |
 | **A2** core-frequent fuzzy concepts are more robust | **Supported.** Concept-degree change 0.0089 vs 0.0134, lower in 20/20 replicates |
-| **A3** structure | 208 core-frequent concepts (vs 2,649 sigma-frequent; crisp 51), 137 rules ≥ 0.60. Same set for Łukasiewicz and Gödel. Bootstrap Jaccard 0.919 vs 0.932 crisp |
+| **A3** structure | 208 core-frequent concepts (vs 2,649 sigma-frequent; crisp 51), 137 rules ≥ 0.60. Same set for Łukasiewicz and Gödel on this dataset. Bootstrap Jaccard 0.919 vs 0.932 crisp |
 
 **Bottom line.** Fuzzy memberships help: they predict better and are more robust than
 crisp quintile scores. The fuzzy concept lattice, as pre-specified, predicts worse
@@ -158,9 +158,11 @@ features are still the full fuzzy degrees.
 | Intents with a ½ term | 0 % | | 89 % |
 | Bootstrap Jaccard (50), mean (min) | 0.932 (0.855) | 0.946 / 0.945 | 0.919 (0.888) |
 
-- A customer's degree is 1 exactly when B(m) ≤ I(g, m) for all m, under either residuum, so
-  the core-frequent sets are **identical** for Łukasiewicz and Gödel; only the degrees
-  used as features differ.
+- A customer's degree is 1 exactly when B(m) ≤ I(g, m) for all m, under either residuum,
+  but the set of closed intents depends on the residuum. On Online Retail II the
+  core-frequent sets happen to be **identical** for Łukasiewicz and Gödel, so only the
+  degrees used as features differ. This is not guaranteed in general: on CDNOW the
+  two sets differ.
 - The near-universal concepts are gone. The most supported ones are single "partly"
   terms such as {½/R3} (30 % fully in: customers in or next to the middle recency band).
 - Rules are now readable and boundary-aware, for example:
