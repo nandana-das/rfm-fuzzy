@@ -13,14 +13,21 @@ and association rules off the concept lattice. Its stated future work is a
 
 - [x] **Replication of the base paper.** 208 concepts, the paper's concept sizes to within
   0.8 customers on average, all 18 published rules recomputed. See [docs/REPLICATION.md](docs/REPLICATION.md).
-- [ ] Fuzzy RFM context and fuzzy concept lattice.
-- [ ] Evaluation against the crisp baseline.
+- [x] **Fuzzy RFM context and fuzzy concept lattice** (Bělohlávek, Łukasiewicz and Gödel,
+  3-level chain). Plan fixed before evaluation: [docs/EXTENSION_PLAN.md](docs/EXTENSION_PLAN.md).
+- [x] **Evaluation against the crisp baseline**: [docs/EXTENSION_RESULTS.md](docs/EXTENSION_RESULTS.md).
+  - Fuzzy memberships beat crisp quintile scores out of sample at every origin
+    (AUC +0.004, R² +0.008) and change less when 5 % of invoices are dropped (20/20 replicates).
+  - The pre-registered fuzzy lattice predicted *worse* than the crisp lattice
+    (overfitting: ~2,600 concepts vs ~50). With tuned regularisation (exploratory) it
+    is slightly better than the crisp lattice, but not better than the fuzzy memberships alone.
 
 ## Layout
 
 ```
 rfmfca/            library: data loading, RFM scoring, FCA lattice, clustering baselines
-scripts/           fetch_data.py, replicate_base_paper.py, compare_with_paper.py
+scripts/           fetch_data.py, replicate_base_paper.py, compare_with_paper.py,
+                   evaluate_{prediction,robustness,structure}.py, posthoc_tuned_regularization.py
 results/           generated tables and figures
 docs/              write-ups
 tests/             pytest suite

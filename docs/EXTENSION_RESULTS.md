@@ -7,16 +7,19 @@ code ran. Data: UCI Online Retail II (see [REPLICATION.md](REPLICATION.md)).
 
 | Hypothesis | Verdict |
 |---|---|
-| **H1** fuzzy FCA (Łukasiewicz) predicts better than crisp FCA | **Rejected, opposite direction.** It is significantly *worse* on both targets (AUC −0.048, R² −0.125; Holm p = 0.002), at every origin. The Gödel variant is also worse than crisp FCA |
+| **H1** fuzzy FCA (Łukasiewicz) predicts better than crisp FCA | **Rejected, opposite direction.** It is significantly *worse* on both targets (AUC −0.048, R² −0.125; Holm p = 0.002), at every origin. The Gödel variant is also worse than crisp FCA. An exploratory re-run with tuned regularisation reverses this to a small gain (+0.004 AUC), so the failure is mostly overfitting |
 | H1 secondary: does fuzzifying the context alone help? | **Yes.** The 15 fuzzy memberships beat the 15 crisp quintile indicators at every origin (AUC +0.004, R² +0.008, p = 0.001), and are on par with or better than continuous log-RFM |
 | **H2** fuzzy memberships are more robust to small data perturbations | **Supported.** Lower change in all 20 replicates (0.048 vs 0.052 at context level; 0.008 vs 0.013 at concept level) |
 | **H3** structure size and stability (descriptive) | Fuzzy lattices are 17–18× larger (3,841 / 3,635 vs 208 concepts). Their frequent-concept sets are slightly *more* stable under bootstrap (Jaccard 0.946 / 0.945 vs 0.932) with far lower variance |
 
 **Bottom line.** Fuzzy memberships help: they predict better and are more robust than
-crisp quintile scores. Building a fuzzy concept lattice on top of them, as specified
-here, does not help: the lattice blows up, the Łukasiewicz version fills up with
-uninformative concepts, and predictions get worse. The value of fuzzification for
-RFM-FCA lies in the context, not in the concept lattice.
+crisp quintile scores. The fuzzy concept lattice, as pre-specified, predicts worse
+because it is 17× larger and the fixed regularisation lets it overfit; the Łukasiewicz
+version also fills up with uninformative concepts. In an exploratory re-run with tuned
+regularisation, both fuzzy lattices beat the crisp lattice slightly (+0.004 AUC) but
+still not the fuzzy memberships alone. The value of fuzzification for RFM-FCA lies in
+the context; the lattice is a readable view of it (best with the Gödel residuum),
+not a source of extra predictive signal.
 
 ## H1: prediction (rolling origin, 90-day horizon)
 
@@ -95,7 +98,42 @@ little for marketing.
 
 ## Exploratory follow-up: is the H1 failure just overfitting?
 
-POST_HOC_PLACEHOLDER
+**Exploratory, post hoc, not part of the plan.** The planned run used fixed
+regularisation (C = 1, α = 1) for every feature set, which is lenient for ~2,600
+features on ~4,000 customers. Re-running H1 on the same origins and outer folds,
+with strength chosen by inner 3-fold CV over 10⁻⁴…10² (`posthoc_tuned_*.csv`):
+
+| Method | ROC AUC | R² | Median chosen C (buy / spend) |
+|---|---|---|---|
+| C-ctx | 0.7822 | 0.2958 | 0.1 / 0.01 |
+| C-fca (base paper) | 0.7799 | 0.2993 | 0.01 / 0.001 |
+| F-ctx | **0.7870** | 0.3038 | 0.1 / 0.01 |
+| F-fca (Łukasiewicz) | 0.7840 | 0.3005 | 0.0001 / 0.0001 |
+| F-fca-G (Gödel) | 0.7840 | **0.3051** | 0.001 / 0.001 |
+| logRFM | 0.7864 | 0.2927 | 1 / 0.1 |
+
+| Comparison | Metric | Difference [95 % CI] | p | Origins A better |
+|---|---|---|---|---|
+| F-fca − C-fca | AUC | +0.0041 [+0.0012, +0.0071] | 0.006 | 4 / 4 |
+| F-fca − C-fca | R² | +0.0012 [−0.0034, +0.0062] | 0.61 | 2 / 4 |
+| F-fca-G − C-fca | AUC | +0.0041 [+0.0014, +0.0070] | 0.006 | 4 / 4 |
+| F-fca-G − C-fca | R² | +0.0058 [+0.0015, +0.0102] | 0.016 | 4 / 4 |
+| F-fca − F-ctx | AUC | −0.0030 [−0.0050, −0.0011] | 0.002 | 0 / 4 |
+| F-fca − F-ctx | R² | −0.0033 [−0.0069, +0.0005] | 0.09 | 1 / 4 |
+| F-ctx − C-ctx | AUC | +0.0048 [+0.0029, +0.0067] | 0.001 | 4 / 4 |
+| F-ctx − C-ctx | R² | +0.0080 [+0.0047, +0.0112] | 0.001 | 4 / 4 |
+
+Reading:
+- The planned H1 failure was **mostly overfitting**. Both fuzzy lattices need
+  100–1,000× stronger regularisation than the crisp context. Once tuned, both beat
+  the base paper's crisp lattice on AUC at every origin, and the Gödel lattice also
+  on R². These gains are small (+0.004 AUC) and were found after seeing the planned
+  result, so they need confirmation on another dataset before being claimed.
+- Even tuned, the fuzzy lattice does **not** beat the 15 fuzzy memberships it is built
+  from (AUC −0.003, p = 0.002). The predictive gain comes from fuzzifying the
+  context; the lattice adds structure for interpretation, not predictive information.
+- The F-ctx advantage over C-ctx is unchanged by tuning, so that secondary finding is
+  robust to the regularisation choice.
 
 ## Deviations from the plan
 
