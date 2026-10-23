@@ -29,12 +29,16 @@ and association rules off the concept lattice. Its stated future work is a
 - [x] **CDNOW confirmation** (plan addendum B, method unchanged): all 7 pre-registered claims
   replicate. See [docs/CDNOW_RESULTS.md](docs/CDNOW_RESULTS.md). Caveats: continuous log-RFM is
   best on CDNOW spend, and heavy frequency ties make the fuzzy lattice less stable.
+- [x] **Tie-aware memberships** (addendum C, exploratory): tied customers are spread over the
+  rank interval their block occupies. On CDNOW this removes all 41 tie-artifact rules and brings
+  lattice stability back to crisp level (bootstrap Jaccard 0.963, worst 0.920 vs 0.524), with
+  unchanged predictions. See [docs/TIE_AWARE_RESULTS.md](docs/TIE_AWARE_RESULTS.md).
 
 ## Layout
 
 ```
 rfmfca/            library: data loading, RFM scoring, FCA lattice, clustering baselines
-scripts/           fetch_data.py, confirm_cdnow.py, replicate_base_paper.py, compare_with_paper.py,
+scripts/           fetch_data.py, confirm_cdnow.py, evaluate_tie_aware.py, replicate_base_paper.py, compare_with_paper.py,
                    evaluate_{prediction,robustness,structure}.py, posthoc_tuned_regularization.py
 results/           generated tables and figures
 docs/              write-ups
