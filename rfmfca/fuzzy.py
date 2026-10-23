@@ -40,6 +40,25 @@ class RankScaler:
             out[d] = np.minimum((less + (equal + 1) / 2) / len(ref), 1.0)
         return pd.DataFrame(out, index=rfm.index)
 
+    def transform_intervals(self, rfm):
+        """Rank interval [lo, hi] each customer's tied block occupies among the fitted customers.
+
+        A block of `equal` > 1 tied values spans `equal` ranks, centred on the same
+        mid-rank `transform` returns. Untied and unseen values get a zero-width
+        interval at that mid-rank, so for them nothing changes.
+        """
+        mid = self.transform(rfm)
+        lo, hi = {}, {}
+        for d in DIMENSIONS:
+            ref = self.sorted_[d]
+            x = self._oriented(rfm, d)
+            less = np.searchsorted(ref, x, side="left")
+            equal = np.searchsorted(ref, x, side="right") - less
+            tied = equal > 1
+            lo[d] = np.where(tied, (less + 0.5) / len(ref), mid[d])
+            hi[d] = np.where(tied, np.minimum((less + equal + 0.5) / len(ref), 1.0), mid[d])
+        return pd.DataFrame(lo, index=rfm.index), pd.DataFrame(hi, index=rfm.index)
+
 
 # -- contexts -----------------------------------------------------------------
 
@@ -60,6 +79,27 @@ def fuzzy_context(ranks, n_levels=3):
         m = term_memberships(ranks[d])
         cols.append(np.abs(m[:, :, None] - grid).argmin(axis=2))
     return pd.DataFrame(np.hstack(cols).astype(np.int16), index=ranks.index, columns=ATTRIBUTES)
+
+
+def interval_memberships(lo, hi, n_points=101):
+    """Triangular memberships averaged over u ~ Uniform[lo, hi] (midpoint rule)."""
+    lo, hi = np.asarray(lo, float), np.asarray(hi, float)
+    t = (np.arange(n_points) + 0.5) / n_points
+    out = np.zeros((len(lo), 5))
+    for k in range(n_points):
+        out += term_memberships(lo + t[k] * (hi - lo))
+    return out / n_points
+
+
+def tie_aware_fuzzy_context(intervals, n_levels=3):
+    """Like fuzzy_context, but a tied block's membership is averaged over its rank interval."""
+    lo, hi = intervals
+    grid = np.linspace(0, 1, n_levels)
+    cols = []
+    for d in DIMENSIONS:
+        m = interval_memberships(lo[d], hi[d])
+        cols.append(np.abs(m[:, :, None] - grid).argmin(axis=2))
+    return pd.DataFrame(np.hstack(cols).astype(np.int16), index=lo.index, columns=ATTRIBUTES)
 
 
 def crisp_context(ranks):

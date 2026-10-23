@@ -94,3 +94,32 @@ def test_core_support_counts_full_members_only():
     rules = lat.induced_cover_rules(lat.frequent(0.01, "core"))
     assert len(rules) > 0
     assert ((rules.confidence > 0) & (rules.confidence <= 1)).all()
+
+
+def test_interval_memberships():
+    from rfmfca.fuzzy import interval_memberships
+    # A point interval equals the point membership.
+    assert np.allclose(interval_memberships([0.42], [0.42]), term_memberships([0.42]))
+    # Averaged over the whole scale each of the five terms gets mass 0.2.
+    m = interval_memberships([0.0], [1.0], n_points=10001)[0]
+    assert np.isclose(m.sum(), 1) and np.allclose(m, m[::-1], atol=1e-3)
+    assert np.isclose(m[0], 0.2, atol=1e-3) and np.isclose(m[2], 0.2, atol=1e-3)
+
+
+def test_tie_aware_context_spreads_tied_block():
+    from rfmfca.fuzzy import tie_aware_fuzzy_context
+    # 13 of 20 customers tied at the bottom of F (like one-time buyers in CDNOW).
+    rfm = pd.DataFrame({"recency_days": np.arange(20), "transaction_count": [1] * 13 + list(range(2, 9)),
+                        "amount": np.arange(20.0)})
+    sc = RankScaler().fit(rfm)
+    lo, hi = sc.transform_intervals(rfm)
+    assert np.isclose(lo.loc[0, "F"], 0.025) and np.isclose(hi.loc[0, "F"], 0.675)
+    assert np.isclose((lo.loc[0, "F"] + hi.loc[0, "F"]) / 2, sc.transform(rfm).loc[0, "F"])
+    plain = fuzzy_context(sc.transform(rfm))
+    tie = tie_aware_fuzzy_context((lo, hi))
+    f_cols = [f"F{k}" for k in range(1, 6)]
+    assert list(plain.loc[0, f_cols] > 0) == [False, True, False, False, False]   # mid-rank: F2 only
+    assert list(tie.loc[0, f_cols]) == [1, 1, 1, 0, 0]         # interval: partly F1, F2, F3
+    untied = [c for c in tie.columns if c[0] in "RM"]
+    assert (tie[untied] == plain[untied]).all().all()          # untied dimensions unchanged
+    assert (tie.loc[13:, f_cols] == plain.loc[13:, f_cols]).all().all()

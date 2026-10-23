@@ -7,7 +7,8 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import r2_score, roc_auc_score
 
-from rfmfca.fuzzy import FuzzyConceptLattice, RankScaler, crisp_context, fuzzy_context
+from rfmfca.fuzzy import (FuzzyConceptLattice, RankScaler, crisp_context, fuzzy_context,
+                          tie_aware_fuzzy_context)
 
 MIN_SUPPORT = 0.04
 METHODS = ("C-ctx", "C-fca", "F-ctx", "F-fca", "F-fca-G", "logRFM")
@@ -22,30 +23,45 @@ CORE_SPECS = {
     "F-fca-G-core": ("fuzzy", 3, "godel"),
 }
 CORE_METHODS = ("C-ctx", "C-fca", "F-ctx", "F-fca-core", "F-fca-G-core")
+# Plan addendum C: tie-aware fuzzy context (tied blocks averaged over their rank interval).
+TIE_SPECS = {
+    "F-fca-core-T": ("fuzzy-tie", 3, "lukasiewicz"),
+    "F-fca-G-core-T": ("fuzzy-tie", 3, "godel"),
+}
 
 
-def _context(kind, ranks):
-    return crisp_context(ranks) if kind == "crisp" else fuzzy_context(ranks, n_levels=3)
+def _context(kind, ranks, intervals=None):
+    if kind == "crisp":
+        return crisp_context(ranks)
+    if kind == "fuzzy-tie":
+        return tie_aware_fuzzy_context(intervals, n_levels=3)
+    return fuzzy_context(ranks, n_levels=3)
 
 
 def build_features(train_rfm, test_rfm, methods=METHODS, min_support=MIN_SUPPORT):
     """Return {method: (X_train, X_test, info)} with info holding e.g. the concept count."""
     scaler = RankScaler().fit(train_rfm)
     u_tr, u_te = scaler.transform(train_rfm), scaler.transform(test_rfm)
+    needs_ties = any(m == "F-ctx-T" or m in TIE_SPECS for m in methods)
+    iv_tr = scaler.transform_intervals(train_rfm) if needs_ties else None
+    iv_te = scaler.transform_intervals(test_rfm) if needs_ties else None
     out = {}
     for m in methods:
         if m == "C-ctx":
             out[m] = (crisp_context(u_tr).to_numpy(float), crisp_context(u_te).to_numpy(float), {})
         elif m == "F-ctx":
             out[m] = (fuzzy_context(u_tr).to_numpy(float) / 2, fuzzy_context(u_te).to_numpy(float) / 2, {})
+        elif m == "F-ctx-T":
+            out[m] = (tie_aware_fuzzy_context(iv_tr).to_numpy(float) / 2,
+                      tie_aware_fuzzy_context(iv_te).to_numpy(float) / 2, {})
         elif m == "logRFM":
             cols = ["recency_days", "transaction_count", "amount"]
             out[m] = (np.log1p(train_rfm[cols].to_numpy(float)),
                       np.log1p(test_rfm[cols].to_numpy(float)), {})
         else:
-            support_kind = "core" if m in CORE_SPECS else "sigma"
-            kind, n_levels, residuum = {**LATTICE_SPECS, **CORE_SPECS}[m]
-            ctx_tr, ctx_te = _context(kind, u_tr), _context(kind, u_te)
+            support_kind = "core" if (m in CORE_SPECS or m in TIE_SPECS) else "sigma"
+            kind, n_levels, residuum = {**LATTICE_SPECS, **CORE_SPECS, **TIE_SPECS}[m]
+            ctx_tr, ctx_te = _context(kind, u_tr, iv_tr), _context(kind, u_te, iv_te)
             lat = FuzzyConceptLattice(ctx_tr, n_levels, residuum)
             idx = lat.frequent(min_support, support_kind)
             intents = lat.intents[idx]

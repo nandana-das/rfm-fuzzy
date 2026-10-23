@@ -174,3 +174,45 @@ B4a context-level change, F-ctx vs C-ctx; B4b concept-degree change, F-fca-core 
 **Descriptive:** all other method comparisons in both settings, concept counts, rules
 ≥ 0.60 among core-frequent concepts, bootstrap Jaccard stability (50 samples) of the
 frequent sets, band occupancy per cutoff.
+
+---
+
+## Addendum C (2026-10-23): tie-aware fuzzy memberships
+
+Written and committed **before** any outcome-based analysis of the tie-aware variant. It
+is motivated by the CDNOW results (heavily tied frequency), and CDNOW has already been
+analysed, so this is an exploratory follow-up, not a confirmation.
+
+**Method.** A block of k > 1 customers with the same value occupies k ranks. Instead of
+placing all of them at the block's mid-rank, each member's term memberships are the
+triangular memberships averaged over u ~ Uniform on the block's rank interval (centred on
+the same mid-rank), then rounded to {0, ½, 1} as before. Untied and unseen values are
+unchanged. Crisp methods are unchanged.
+
+**Structure-only check before this addendum** (full data): on CDNOW the context changes for
+50.4 % of customers, all on F (one-time buyers move from "fully F2" to "partly F1, F2, F3");
+R and M do not change. Core-frequent concepts: 197 (Łukasiewicz) / 198 (Gödel). On Online
+Retail II **no customer's context changes**, so the variant is identical there and is
+evaluated on CDNOW only; per-fold identity on Online Retail II is checked and reported.
+
+**Methods** (CDNOW, same design as Addendum B): F-ctx-T, F-fca-core-T (Łukasiewicz),
+F-fca-G-core-T (Gödel), alongside C-ctx, C-fca, F-ctx, F-fca-core, logRFM.
+
+**Tests** (two-sided; the tie-aware variant could help or hurt):
+
+| # | Comparison | Setting | Metric |
+|---|---|---|---|
+| C1a | F-ctx-T − F-ctx | fixed | AUC |
+| C1b | F-ctx-T − F-ctx | fixed | R² |
+| C2a | F-fca-core-T − F-fca-core | tuned | AUC |
+| C2b | F-fca-core-T − F-fca-core | tuned | R² |
+
+Holm over the four. Descriptive: every method vs logRFM and vs crisp; both settings.
+
+**Structure and robustness (descriptive, expected direction stated):**
+- Bootstrap Jaccard (50 samples) of core-frequent sets, F-fca-core-T vs F-fca-core
+  (expected higher, especially the minimum).
+- Number of "tie-artifact" rules among rules ≥ 0.60: rules whose consequent only raises a
+  ½ to 1 on one F term, with confidence ≥ 0.999 (expected fewer).
+- Context and concept-degree change under the 20-replicate invoice-drop design, tie-aware
+  vs plain fuzzy.
