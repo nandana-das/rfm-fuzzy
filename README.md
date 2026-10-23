@@ -33,12 +33,16 @@ and association rules off the concept lattice. Its stated future work is a
   rank interval their block occupies. On CDNOW this removes all 41 tie-artifact rules and brings
   lattice stability back to crisp level (bootstrap Jaccard 0.963, worst 0.920 vs 0.524), with
   unchanged predictions. See [docs/TIE_AWARE_RESULTS.md](docs/TIE_AWARE_RESULTS.md).
+- [x] **dunnhumby confirmation** (addendum D): 4 of 7 claims replicate. Fuzzy memberships beat crisp
+  quintiles and the core-filtered fuzzy lattice beats crisp FCA (tuned) on all three datasets; the
+  lattice adding signal beyond the memberships and the robustness advantage do **not** hold here.
+  See [docs/DUNNHUMBY_RESULTS.md](docs/DUNNHUMBY_RESULTS.md).
 
 ## Layout
 
 ```
 rfmfca/            library: data loading, RFM scoring, FCA lattice, clustering baselines
-scripts/           fetch_data.py, confirm_cdnow.py, evaluate_tie_aware.py, replicate_base_paper.py, compare_with_paper.py,
+scripts/           fetch_data.py, confirm_cdnow.py, confirm_dunnhumby.py, evaluate_tie_aware.py, replicate_base_paper.py, compare_with_paper.py,
                    evaluate_{prediction,robustness,structure}.py, posthoc_tuned_regularization.py
 results/           generated tables and figures
 docs/              write-ups

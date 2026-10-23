@@ -1,0 +1,4 @@
+method,n_concepts,n_frequent,n_rules_conf60,mean_intent_size
+C-fca,158,49,18,1.7755102040816326
+F-fca-core,2230,215,185,1.3534883720930233
+F-fca-G-core,2294,220,194,1.356818181818182
