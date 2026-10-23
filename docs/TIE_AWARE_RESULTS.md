@@ -20,7 +20,7 @@ untied values are unchanged.
 | More stable structure? | **Yes, back to crisp level.** Bootstrap Jaccard 0.963 (min 0.920) vs 0.908 (min 0.524) plain fuzzy; crisp 0.966 (min 0.893) |
 | More robust concept memberships? | **Slightly.** Concept-degree change 0.0072 vs 0.0076, lower in 20/20 replicates |
 | Different predictions? | **No.** All four tests non-significant, every difference < 0.0002 |
-| Online Retail II affected? | Essentially no: no customer changes on full data; in 19 of 40 fold/part checks a few customers change, max 0.8 % |
+| Online Retail II affected? | Essentially no: no customer changes on full data; in 2 of 40 fold/part checks a few customers change (max 0.8 %) |
 
 ## Prediction (C1–C2, Holm over four)
 
@@ -72,4 +72,4 @@ structural gains should be checked on a third dataset with heavy ties.
 
 - The plan said the variant is identical on Online Retail II at full-data level and that
   per-fold identity would be checked. Per fold it is *nearly* identical: a few customers
-  change in 19 of 40 checks (max 0.8 %). The variant was not run on Online Retail II.
+  change in 2 of 40 checks (max 0.8 %). The variant was not run on Online Retail II.
