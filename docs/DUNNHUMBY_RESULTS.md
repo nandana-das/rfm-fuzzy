@@ -59,8 +59,8 @@ everyone's rank jitters slightly. With the 3-level chain there are two rounding 
 points between neighbouring term centres (memberships 0.25 and 0.75), each worth a
 half-step, against one full-step cut point per quintile boundary for crisp. Under small
 rank jitter the expected change is therefore about the same, and which one is lower
-depends on where customers sit relative to the cut points. Here 9.2 % of households
-change fuzzy context vs 6.6 % crisp, and the fuzzy total is higher. The earlier wins
+depends on where customers sit relative to the cut points. Here 25.4 % of households
+change fuzzy context vs 11.1 % crisp, and the fuzzy total is higher. The earlier wins
 (Online Retail II, CDNOW) were real but are **not a general property** of this
 fuzzification.
 
