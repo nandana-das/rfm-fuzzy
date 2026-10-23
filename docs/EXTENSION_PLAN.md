@@ -92,3 +92,43 @@ structure.
 All metrics in the tables above, for every origin and replicate, including results
 that do not favour the fuzzy method. Any change to this plan after evaluation code
 is run will be listed in a "deviations" section of the results document.
+
+---
+
+## Addendum A (2026-10-23): scale-aware support threshold
+
+Written and committed **after** the results in EXTENSION_RESULTS.md were known and
+**before** any outcome (prediction, robustness, stability) was computed for the new
+filter. It is a follow-up on the same dataset, motivated by the H1 failure, so its
+results are a second-stage analysis, not an independent confirmation.
+
+**Problem.** Under the Łukasiewicz residuum every customer has degree ≥ 1 − max B(m) in
+a concept with intent B, so sigma-count support treats near-universal ½-intents as
+frequent: 2,649 of 3,841 concepts pass support ≥ 0.04.
+
+**Structure-only check done before fixing this addendum** (full data, no outcomes):
+at 0.04, sigma-count keeps 2,649 (Łukasiewicz) / 378 (Gödel) concepts; support rescaled
+above the Łukasiewicz floor keeps 1,889 / 378; core support keeps 208 / 208; crisp keeps 51
+under all three.
+
+**Filter (fixed).** *Core support* = share of customers whose degree in the concept is
+exactly 1 (the 1-cut of the fuzzy extent). Keep non-top concepts with core support ≥ 0.04.
+For a binary context this equals ordinary support, so the crisp method is unchanged.
+Membership features are still the full fuzzy degrees.
+
+**Methods.** `F-fca-core` (Łukasiewicz degrees, primary) and `F-fca-G-core` (Gödel degrees,
+secondary), compared with C-fca, C-ctx and F-ctx as defined above.
+
+**Hypotheses and tests** (same origins, folds, models, bootstrap and α as the main plan):
+
+- **A1 (prediction).** F-fca-core vs C-fca on AUC and R², fixed regularisation (C = 1,
+  α = 1), Holm over the two targets. Secondary: F-fca-core vs F-ctx, F-fca-G-core vs C-fca,
+  and the same comparisons with regularisation tuned by inner 3-fold CV over 10⁻⁴…10²
+  (as in the exploratory follow-up).
+- **A2 (robustness).** Concept-degree change of the core-frequent concepts under the H2
+  invoice-drop design (20 replicates), F-fca-core vs C-fca; holds if lower in all 20.
+- **A3 (structure, descriptive).** Concept counts, mean intent size, rules ≥ 0.60 among
+  core-frequent concepts (confidence by core counts along induced covers), and bootstrap
+  Jaccard stability of the core-frequent intent set (50 samples) vs crisp.
+
+All numbers will be reported whatever their direction.
