@@ -216,3 +216,34 @@ Holm over the four. Descriptive: every method vs logRFM and vs crisp; both setti
   ½ to 1 on one F term, with confidence ≥ 0.999 (expected fewer).
 - Context and concept-degree change under the 20-replicate invoice-drop design, tie-aware
   vs plain fuzzy.
+
+---
+
+## Addendum D (2026-10-23): confirmation on dunnhumby "The Complete Journey"
+
+Written and committed **before** any outcome-based analysis of this dataset in this
+project. Done beforehand (structure and base rates only): row/household counts, tie sizes,
+lattice sizes and build times at the cutoffs below, the share of customers changed by the
+tie-aware variant, and the share of households buying in each horizon.
+
+**Prior exposure, disclosed.** An earlier, separate project by the same author analysed this
+dataset with a different fuzzy RFM-FCA method (threshold-scaled context, no core filter, no
+tie handling); its summary results were seen during this project. No method or claim below
+was tuned on this dataset.
+
+**Data.** 2,500 households, 2,595,732 basket lines over 711 days (2,581,266 after dropping
+quantity ≤ 0 or negative sales value). Household = customer, basket line = invoice line,
+SALES_VALUE = spend. Day numbers are mapped to dates from an arbitrary anchor.
+
+**Design.** As in Addendum B. Cutoffs at days 351, 441, 531, 621 (≥ 350 days of history,
+90-day horizons, last horizon ends at day 711), ~2,500 households each. Same methods
+(C-ctx, C-fca, F-ctx, F-fca-core, F-fca-G-core, logRFM), models, folds, settings and bootstrap.
+
+**Confirmatory claims:** D1a, D1b, D2a, D2b, D3, identical in content to B1a–B3 (same
+comparisons, settings, metrics, direction, Holm over five), and D4a, D4b identical to B4a–B4b.
+
+**Known limitations from the structure check:**
+- 92–93 % of households buy in every horizon, so the AUC claims rest on few non-buyers;
+  spend R² is the more informative target.
+- The tie-aware variant changes 0–0.1 % of customers here, so it is **not** tested on this
+  dataset (it cannot be confirmed where it does nothing).
