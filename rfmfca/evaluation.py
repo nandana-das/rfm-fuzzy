@@ -16,6 +16,12 @@ LATTICE_SPECS = {          # method -> (context kind, n_levels, residuum)
     "F-fca": ("fuzzy", 3, "lukasiewicz"),
     "F-fca-G": ("fuzzy", 3, "godel"),
 }
+# Plan addendum A: same lattices, filtered by core support instead of sigma-count.
+CORE_SPECS = {
+    "F-fca-core": ("fuzzy", 3, "lukasiewicz"),
+    "F-fca-G-core": ("fuzzy", 3, "godel"),
+}
+CORE_METHODS = ("C-ctx", "C-fca", "F-ctx", "F-fca-core", "F-fca-G-core")
 
 
 def _context(kind, ranks):
@@ -37,10 +43,11 @@ def build_features(train_rfm, test_rfm, methods=METHODS, min_support=MIN_SUPPORT
             out[m] = (np.log1p(train_rfm[cols].to_numpy(float)),
                       np.log1p(test_rfm[cols].to_numpy(float)), {})
         else:
-            kind, n_levels, residuum = LATTICE_SPECS[m]
+            support_kind = "core" if m in CORE_SPECS else "sigma"
+            kind, n_levels, residuum = {**LATTICE_SPECS, **CORE_SPECS}[m]
             ctx_tr, ctx_te = _context(kind, u_tr), _context(kind, u_te)
             lat = FuzzyConceptLattice(ctx_tr, n_levels, residuum)
-            idx = lat.frequent(min_support)
+            idx = lat.frequent(min_support, support_kind)
             intents = lat.intents[idx]
             out[m] = (lat.degrees(ctx_tr.to_numpy(), intents), lat.degrees(ctx_te.to_numpy(), intents),
                       {"n_concepts": len(lat.intents), "n_frequent": len(idx)})

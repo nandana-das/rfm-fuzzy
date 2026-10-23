@@ -76,3 +76,21 @@ def test_crisp_context_one_hot():
     assert list(c[["R1", "R2", "R5"]].idxmax(axis=1)) == ["R1", "R1", "R2", "R5"]
     f = fuzzy_context(ranks)
     assert f.loc[1, "R1"] == 1 and f.loc[1, "R2"] == 1   # u = 0.2 sits on the boundary: 0.5 / 0.5
+
+
+def test_core_support_equals_support_when_crisp():
+    lat = FuzzyConceptLattice(toy(), n_levels=2)
+    assert np.allclose(lat.core_support, lat.support)
+    assert list(lat.frequent(0.5, "core")) == list(lat.frequent(0.5))
+
+
+def test_core_support_counts_full_members_only():
+    ctx = pd.DataFrame([[2, 0], [1, 2], [0, 2]], columns=["a", "b"]).astype(np.int16)
+    lat = FuzzyConceptLattice(ctx, n_levels=3)
+    half_a = [i for i, b in enumerate(lat.intents) if list(b) == [1, 0]][0]
+    # Lukasiewicz: degrees in {1/2 a} are 1, 1, 1/2 -> sigma 2.5/3, core 2/3.
+    assert np.isclose(lat.support[half_a], 2.5 / 3)
+    assert np.isclose(lat.core_support[half_a], 2 / 3)
+    rules = lat.induced_cover_rules(lat.frequent(0.01, "core"))
+    assert len(rules) > 0
+    assert ((rules.confidence > 0) & (rules.confidence <= 1)).all()

@@ -100,6 +100,8 @@ class FuzzyConceptLattice:
         self.intents = self._closure_system()
         degrees = self.degrees(self.rows_)
         self.support = (degrees * self.row_counts_[:, None]).sum(axis=0) / self.n_objects
+        # Core support: share of objects fully in the concept (1-cut of the extent).
+        self.core_support = ((degrees >= 1) * self.row_counts_[:, None]).sum(axis=0) / self.n_objects
         self._lower_covers = None
 
     def _closure_system(self):
@@ -121,10 +123,35 @@ class FuzzyConceptLattice:
             out[:, j] = implication(b, q, self.top, self.residuum).min(axis=1)
         return out / self.top
 
-    def frequent(self, min_support):
-        """Indices of non-top concepts with sigma-count support >= min_support."""
+    def frequent(self, min_support, kind="sigma"):
+        """Indices of non-top concepts whose support (sigma-count or core) >= min_support."""
+        support = {"sigma": self.support, "core": self.core_support}[kind]
         nonempty = self.intents.sum(axis=1) > 0
-        return np.flatnonzero(nonempty & (self.support >= min_support - 1e-12))
+        return np.flatnonzero(nonempty & (support >= min_support - 1e-12))
+
+    def induced_cover_rules(self, idx, min_confidence=0.0):
+        """Rules along the covers of the sub-order on concepts `idx`, by core counts."""
+        idx = np.asarray(idx)
+        X = self.intents[idx]
+        rows = []
+        for a in range(len(idx)):
+            sup = np.flatnonzero((X >= X[a]).all(axis=1))
+            sup = sup[sup != a]
+            below = (X[sup][:, None, :] <= X[sup][None, :, :]).all(axis=2)
+            np.fill_diagonal(below, False)
+            for b in sup[~below.any(axis=0)]:
+                i, j = idx[a], idx[b]
+                if self.core_support[i] == 0:
+                    continue
+                conf = self.core_support[j] / self.core_support[i]
+                if conf >= min_confidence:
+                    rows.append({"premise": self.label(self.intents[i]),
+                                 "premise_core_count": self.core_support[i] * self.n_objects,
+                                 "consequent_intent": self.label(self.intents[j]),
+                                 "rule_core_count": self.core_support[j] * self.n_objects,
+                                 "confidence": conf})
+        cols = ["premise", "premise_core_count", "consequent_intent", "rule_core_count", "confidence"]
+        return pd.DataFrame(rows, columns=cols).sort_values("confidence", ascending=False, ignore_index=True)
 
     def label(self, intent):
         parts = []
@@ -143,6 +170,7 @@ class FuzzyConceptLattice:
             "intent_size": self.intents[idx].sum(axis=1) / self.top,
             "support": self.support[idx],
             "sigma_count": self.support[idx] * self.n_objects,
+            "core_support": self.core_support[idx],
         })
 
     def lower_covers(self):
