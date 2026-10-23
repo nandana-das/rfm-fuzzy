@@ -1,0 +1,4 @@
+method,n_concepts,n_core_frequent,n_rules_conf60,mean_intent_size,share_intents_with_partial_term,lukasiewicz_and_godel_core_sets_identical
+C-fca,208,51,10,1.7647058823529411,0.0,True
+F-fca-core,3841,208,137,1.3125,0.8942307692307693,True
+F-fca-G-core,3635,208,137,1.3125,0.8942307692307693,True
