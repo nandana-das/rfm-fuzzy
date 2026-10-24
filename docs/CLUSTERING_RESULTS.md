@@ -89,7 +89,7 @@ Replicates in which F-fca-core is higher (of 20):
 - Against FCM the margin is smaller: clearly ahead on Online Retail II, and in the other
   cells FCM wins some replicates (dunnhumby robustness: 8 of 20, where FCM's mean is pulled
   down by occasional bad fits, min 0.815). Fuzzy RFM-FCA is the more *consistent* of the two:
-  its minima are higher in five of six cells.
+  its minima are higher in all six cells.
 
 ## Verdict
 
