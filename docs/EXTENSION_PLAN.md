@@ -339,3 +339,32 @@ C-fca, F-fca-core, F-ctx, logRFM, KM10, GMM10, FCM10 (out-of-fold predictions ar
 **Tests.** Primary, per dataset, Holm over four: H1 F-fca-core − C-fca and H2 F-fca-core − FCM10,
 each on revenue captured at 20 % and lift at 20 %; same paired customer bootstrap, mean over origins.
 Descriptive: all other methods and q = 10 %.
+
+---
+
+## Addendum I (2026-10-24): interpretability proxies
+
+Written and committed **before** any of these measures was computed. Descriptive only (no
+hypothesis tests). Interpretability for people is not measured; these are structural stand-ins.
+
+**Setting.** Full data of each dataset; methods C-fca, F-fca-core, KM10, GMM10, FCM10 (GMM and FCM
+hard-assigned by largest membership; the full-data fits used in Addendum G).
+
+**Segments and descriptions.**
+- FCA: segments = frequent concepts (crisp: extent; fuzzy: core, i.e. degree 1); description =
+  the intent (a term satisfied when the customer's membership is at least the intent's level).
+- Clusters: description = for each of R, F, M, the shortest run of adjacent crisp quintile terms
+  holding ≥ 80 % of the cluster's members; a dimension whose run spans all five terms is dropped.
+  A customer satisfies it when their crisp quintiles fall in every run.
+
+**Measures.**
+1. *Description fidelity*: F1 between "satisfies the description" and "is a member", averaged over
+   segments weighted by size (FCA is 1 by construction; computed anyway as a check).
+2. *Description length*: number of constrained dimensions per segment (size-weighted mean).
+3. *Number of segments*; *coverage* (share of customers in ≥ 1 segment); *overlap* (mean number of
+   segments per covered customer).
+4. *Rules* (FCA only): rules ≥ 0.60 along covers among segments (as in Addendum A), their number,
+   mean confidence and share ≥ 0.80.
+5. *Softness* (GMM, FCM): mean largest membership per customer.
+6. *Boundary customers*: share of customers within 0.05 of a quintile cut point (rank scale) on at
+   least one dimension, i.e. those whose crisp segment hinges on a near-arbitrary cut.
