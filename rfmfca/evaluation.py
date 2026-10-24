@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import r2_score, roc_auc_score
 
-from rfmfca.fuzzy import (FuzzyConceptLattice, RankScaler, crisp_context, fuzzy_context,
+from rfmfca.fuzzy import (FuzzyConceptLattice, RankScaler, crisp_context, fuzzy_context, select_concepts,
                           tie_aware_fuzzy_context)
 from rfmfca.segmenters import choose_k, log_rfm, segment_features
 
@@ -34,6 +34,9 @@ HYBRIDS = {"HYB-fca": "F-fca-core", "HYB-ctx": "F-ctx", "HYB-cfca": "C-fca"}
 # Plan addendum F: clustering baselines; k from the training fold's silhouette, or fixed at 10.
 CLUSTERERS = {"KM": ("KM", None), "GMM": ("GMM", None), "FCM": ("FCM", None),
               "KM10": ("KM", 10), "GMM10": ("GMM", 10), "FCM10": ("FCM", 10)}
+# Plan addendum J: K concepts chosen by greedy description coverage.
+SELECTED = {"F-sel10": ("fuzzy", 3, "core", 10), "F-sel20": ("fuzzy", 3, "core", 20),
+            "C-sel10": ("crisp", 2, "sigma", 10), "C-sel20": ("crisp", 2, "sigma", 20)}
 
 
 def _context(kind, ranks, intervals=None):
@@ -63,6 +66,14 @@ def build_features(train_rfm, test_rfm, methods=METHODS, min_support=MIN_SUPPORT
                 k = chosen_k
             x_tr, x_te = segment_features(algo, train_rfm, test_rfm, k)
             out[m] = (x_tr, x_te, {"k": k})
+        elif m in SELECTED:
+            kind, n_levels, support_kind, k = SELECTED[m]
+            ctx_tr, ctx_te = _context(kind, u_tr), _context(kind, u_te)
+            lat = FuzzyConceptLattice(ctx_tr, n_levels, "lukasiewicz")
+            chosen = select_concepts(lat, lat.frequent(min_support, support_kind), k)
+            intents = lat.intents[chosen]
+            out[m] = (lat.degrees(ctx_tr.to_numpy(), intents), lat.degrees(ctx_te.to_numpy(), intents),
+                      {"k": len(chosen), "intents": [lat.label(b) for b in intents]})
         elif m == "C-ctx":
             out[m] = (crisp_context(u_tr).to_numpy(float), crisp_context(u_te).to_numpy(float), {})
         elif m == "F-ctx":

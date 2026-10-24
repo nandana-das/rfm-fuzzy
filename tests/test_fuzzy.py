@@ -123,3 +123,13 @@ def test_tie_aware_context_spreads_tied_block():
     untied = [c for c in tie.columns if c[0] in "RM"]
     assert (tie[untied] == plain[untied]).all().all()          # untied dimensions unchanged
     assert (tie.loc[13:, f_cols] == plain.loc[13:, f_cols]).all().all()
+
+
+def test_select_concepts_prefers_specific_common_concepts():
+    from rfmfca.fuzzy import select_concepts
+    # 6 customers fully {a, b}, 2 fully {c}: the first pick must be {a, b} (mass 2 x 6).
+    ctx = pd.DataFrame([[1, 1, 0]] * 6 + [[0, 0, 1]] * 2, columns=["a", "b", "c"]).astype(np.int16)
+    lat = FuzzyConceptLattice(ctx, n_levels=2)
+    chosen = select_concepts(lat, lat.frequent(0.1), 2)
+    labels = [lat.label(lat.intents[i]) for i in chosen]
+    assert labels == ["{a, b}", "{c}"]

@@ -248,3 +248,26 @@ class FuzzyConceptLattice:
                                  "confidence": conf})
         cols = ["premise", "premise_sigma_count", "consequent_intent", "rule_sigma_count", "confidence"]
         return pd.DataFrame(rows, columns=cols).sort_values("confidence", ascending=False, ignore_index=True)
+
+
+def select_concepts(lat, candidates, k):
+    """Greedy description-coverage selection of k concepts (plan addendum J).
+
+    A customer's explained mass = the largest intent size among selected concepts the
+    customer is fully in (degree 1). Each step adds the candidate with the largest gain in
+    total explained mass over the fitted customers (ties: larger core support, lower index).
+    """
+    candidates = np.asarray(candidates)
+    full = lat.degrees(lat.rows_, lat.intents[candidates]) >= 1          # unique rows x candidates
+    mass = lat.intents[candidates].sum(axis=1) / lat.top
+    weights = lat.row_counts_
+    current = np.zeros(len(lat.rows_))
+    chosen = []
+    for _ in range(min(k, len(candidates))):
+        gain = (np.maximum(full * mass - current[:, None], 0) * weights[:, None]).sum(axis=0)
+        gain[chosen] = -1
+        order = np.lexsort((np.arange(len(candidates)), -lat.core_support[candidates], -gain))
+        best = order[0]
+        chosen.append(best)
+        current = np.maximum(current, full[:, best] * mass[best])
+    return candidates[chosen]
