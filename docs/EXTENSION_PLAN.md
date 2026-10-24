@@ -302,3 +302,18 @@ Pearson correlation of the pair similarities over the same pairs (1 = identical 
   customers; compare with the full-data fit.
 Methods: C-fca, F-fca-core, KM, GMM, FCM (primary k chosen on the full data the same way).
 Reported descriptively (mean, min, and replicates where F-fca-core exceeds each baseline).
+
+---
+
+## Addendum G (2026-10-24): structure agreement against k = 10 clustering
+
+Written and committed **before** this analysis was run. Motivated by Addendum F, where the
+silhouette rule chose k = 2 everywhere, so the structural comparison with clustering was
+not like for like.
+
+**Design.** Exactly the structure-agreement design of Addendum F (20,000 customer pairs; 20
+invoice-drop replicates; 20 customer bootstraps; same seeds), with methods C-fca, F-fca-core,
+KM10, GMM10, FCM10 on all three datasets.
+
+**Reported** (descriptive): mean and minimum agreement per method, and the number of
+replicates in which F-fca-core exceeds each baseline, for robustness and for stability.

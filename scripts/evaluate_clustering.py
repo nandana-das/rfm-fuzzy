@@ -81,10 +81,10 @@ def agreement(x_ref, x_new, rng):
     return float(np.corrcoef(s_ref, s_new)[0, 1])
 
 
-def structure(name, tx):
+def structure(name, tx, methods=STRUCT_METHODS, suffix=""):
     ref_date = tx["InvoiceDate"].max()
     rfm = compute_rfm(tx, ref_date)
-    ref = {m: v[1] for m, v in build_features(rfm, rfm, STRUCT_METHODS).items()}
+    ref = {m: v[1] for m, v in build_features(rfm, rfm, methods).items()}
     ks = {m: v[2].get("k") for m, v in build_features(rfm, rfm, ("KM",)).items()}
     rng = np.random.default_rng(SEED)
     invoices = tx["InvoiceNo"].unique()
@@ -94,37 +94,43 @@ def structure(name, tx):
         pert = compute_rfm(tx[tx["InvoiceNo"].isin(keep)], ref_date)
         common = rfm.index.intersection(pert.index)
         pos = rfm.index.get_indexer(common)
-        new = build_features(pert, pert.loc[common], STRUCT_METHODS)
+        new = build_features(pert, pert.loc[common], methods)
         pair_rng = np.random.default_rng(SEED + rep)
         row = {"kind": "robustness", "replicate": rep}
-        for m in STRUCT_METHODS:
+        for m in methods:
             row[m] = agreement(ref[m][pos], new[m][1], np.random.default_rng(pair_rng.integers(1 << 31)))
         rows.append(row)
         print(name, "robustness", rep, flush=True)
     for b in range(N_BOOT):
         sample = rfm.iloc[rng.integers(0, len(rfm), len(rfm))]
         sample = sample.set_axis(np.arange(len(sample)))
-        new = build_features(sample, rfm, STRUCT_METHODS)
+        new = build_features(sample, rfm, methods)
         pair_rng = np.random.default_rng(10_000 + b)
         row = {"kind": "stability", "replicate": b}
-        for m in STRUCT_METHODS:
+        for m in methods:
             row[m] = agreement(ref[m], new[m][1], np.random.default_rng(pair_rng.integers(1 << 31)))
         rows.append(row)
         print(name, "stability", b, flush=True)
     out = pd.DataFrame(rows)
     out.insert(0, "dataset", name)
-    out.to_csv(OUT / f"{name}_structure_agreement.csv", index=False)
-    summary = out.groupby("kind")[list(STRUCT_METHODS)].agg(["mean", "min"]).round(4)
+    out.to_csv(OUT / f"{name}_structure_agreement{suffix}.csv", index=False)
+    summary = out.groupby("kind")[list(methods)].agg(["mean", "min"]).round(4)
     print("full-data k:", ks, flush=True)
     print(summary.to_string(), flush=True)
 
 
-def main(name):
+STRUCT10_METHODS = ("C-fca", "F-fca-core", "KM10", "GMM10", "FCM10")   # Addendum G
+
+
+def main(name, mode="all"):
     OUT.mkdir(parents=True, exist_ok=True)
     tx, cutoffs = dataset(name)
+    if mode == "structure10":
+        structure(name, tx, STRUCT10_METHODS, "_k10")
+        return
     structure(name, tx)
     prediction(name, tx, cutoffs)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(*sys.argv[1:3])
