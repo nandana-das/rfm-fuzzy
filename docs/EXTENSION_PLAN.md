@@ -368,3 +368,29 @@ hard-assigned by largest membership; the full-data fits used in Addendum G).
 5. *Softness* (GMM, FCM): mean largest membership per customer.
 6. *Boundary customers*: share of customers within 0.05 of a quintile cut point (rank scale) on at
    least one dimension, i.e. those whose crisp segment hinges on a near-arbitrary cut.
+
+---
+
+## Addendum J (2026-10-24): a summary view of K selected concepts
+
+Written and committed **before** any result for the selected concepts. Motivated by Addendum I
+(fuzzy RFM-FCA yields ~200 segments). Datasets reused (disclosed).
+
+**Selection (unsupervised, fitted on training customers only).** Candidates = the frequent concepts
+(crisp: support ≥ 0.04; fuzzy: core support ≥ 0.04). A customer's *explained mass* given a set of
+selected concepts = the largest intent size (sum of intent degrees: a full term 1, a ½-term ½) among
+selected concepts the customer is *fully* in (degree 1), or 0. Greedy: start empty; K times, add the
+candidate with the largest gain in total explained mass (ties: larger core support, then lower index).
+K = 10 and K = 20. Features = degrees in the selected concepts (crisp: 0/1).
+
+**Methods.** `F-sel10`, `F-sel20` (fuzzy, Łukasiewicz), `C-sel10`, `C-sel20` (crisp), against KM10,
+GMM10, FCM10 and the full F-fca-core / C-fca.
+
+**Prediction** (tuned regularisation, same origins, folds, bootstrap). Primary, per dataset, Holm over
+four: S1 F-sel10 − C-sel10 and S2 F-sel10 − FCM10, on AUC and R². Descriptive: all other pairs, K = 20.
+
+**Structure agreement** as in Addendum G (20 + 20 replicates, same seeds), methods F-sel10, C-sel10,
+F-sel20, C-sel20, KM10, GMM10, FCM10.
+
+**Interpretability proxies** (full data) as in Addendum I, plus: coverage (share of customers fully in
+≥ 1 selected concept) and mean explained mass / 3.
