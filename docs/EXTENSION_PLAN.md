@@ -267,3 +267,38 @@ plus F-fca-core and logRFM for reference.
 **Comparisons** (two-sided, per dataset, Holm over the six tests within a dataset):
 E1 HYB-fca − logRFM (AUC, R²); E2 HYB-fca − HYB-cfca (AUC, R²); E3 HYB-fca − HYB-ctx (AUC, R²).
 All three datasets reported, whatever the direction.
+
+---
+
+## Addendum F (2026-10-24): clustering baselines (K-means, GMM, fuzzy C-means)
+
+Written and committed **before** any clustering-baseline result was computed. The fuzzy
+RFM-FCA method is fixed as specified in Addendum A; only new baselines are added. The
+datasets have been analysed before, so dataset reuse is disclosed, but no baseline result
+has been seen and nothing about the proposed method is changed after this point.
+
+**Baselines.** Fitted on the standardised log1p(R, F, M) of the training customers of each fold:
+- `KM`: K-means (n_init = 10), features = one-hot cluster membership;
+- `GMM`: Gaussian mixture, full covariance (n_init = 3), features = posterior probabilities;
+- `FCM`: fuzzy C-means, fuzzifier m = 2 (max 300 iterations, tolerance 1e-5), features = membership degrees.
+
+**Number of clusters.** Primary: chosen inside each training fold as the k in 2–10 with the
+highest silhouette of K-means on a random sample of ≤ 3,000 training customers (the base
+paper's criterion, no outcome used); the same k is used for all three algorithms.
+Sensitivity: k = 10 for all three (`KM10`, `GMM10`, `FCM10`).
+
+**Prediction** (tuned regularisation, same origins, folds, models, bootstrap as before):
+F1 F-fca-core − FCM, F2 F-fca-core − KM, F3 F-fca-core − GMM, each on AUC and R²;
+two-sided, Holm over the six within each dataset; all three datasets reported.
+Descriptive: F-ctx, C-fca and logRFM against every baseline, and the k = 10 variants.
+
+**Structure similarity** (a measure that applies to every representation): draw 20,000
+random customer pairs; for a representation (rows = customers' feature vectors), the
+similarity of a pair is the cosine of their two vectors. Agreement between two fits =
+Pearson correlation of the pair similarities over the same pairs (1 = identical structure).
+- *Robustness:* 20 replicates dropping 5 % of invoices; refit on perturbed data; compare with
+  the full-data fit on customers present in both.
+- *Stability:* 20 bootstrap samples of customers; fit on the sample, apply to all original
+  customers; compare with the full-data fit.
+Methods: C-fca, F-fca-core, KM, GMM, FCM (primary k chosen on the full data the same way).
+Reported descriptively (mean, min, and replicates where F-fca-core exceeds each baseline).
