@@ -26,3 +26,15 @@ def test_zero_spend_customer_dropped():
     tx = pd.DataFrame({"CustomerID": ["a", "b"], "InvoiceNo": "x",
                        "InvoiceDate": pd.Timestamp("2020-01-01"), "Total": [0.0, 5.0]})
     assert list(compute_rfm(tx).index) == ["b"]
+
+
+def test_targeting_metrics():
+    import numpy as np
+
+    from rfmfca.evaluation import metric
+    spend = np.array([100.0, 0, 0, 0, 0, 0, 0, 0, 0, 0])       # one customer holds all revenue
+    y = np.log1p(spend)
+    assert metric("rev10", y, spend) == 1.0                     # perfect ranking
+    assert metric("rev10", y, -spend) == 0.0                    # worst ranking
+    buy = np.array([1, 1, 0, 0, 0, 0, 0, 0, 0, 0])
+    assert metric("lift20", buy, buy) == 1.0 / 0.2              # all buyers in top 20 %: lift 5

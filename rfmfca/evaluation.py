@@ -91,8 +91,29 @@ def build_features(train_rfm, test_rfm, methods=METHODS, min_support=MIN_SUPPORT
     return out
 
 
+def top_share(score, q):
+    """Boolean mask of the top q (fraction) of customers by score; ties broken by position."""
+    n = max(1, int(round(q * len(score))))
+    mask = np.zeros(len(score), bool)
+    mask[np.argsort(-np.asarray(score), kind="stable")[:n]] = True
+    return mask
+
+
 def metric(name, y, pred):
-    return roc_auc_score(y, pred) if name == "auc" else r2_score(y, pred)
+    """auc / r2, or targeting metrics (Addendum H):
+    revQ = share of revenue held by the top Q % by score (y = log1p spend);
+    liftQ = purchase rate in the top Q % / overall rate (y = 0/1 purchase)."""
+    if name == "auc":
+        return roc_auc_score(y, pred)
+    if name == "r2":
+        return r2_score(y, pred)
+    y = np.asarray(y, float)
+    if name.startswith("rev"):
+        revenue = np.expm1(y)
+        return revenue[top_share(pred, int(name[3:]) / 100)].sum() / revenue.sum()
+    if name.startswith("lift"):
+        return y[top_share(pred, int(name[4:]) / 100)].mean() / y.mean()
+    raise ValueError(name)
 
 
 def paired_bootstrap(origins, metric_name, a, b, n_boot=1000, seed=0):

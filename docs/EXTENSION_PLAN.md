@@ -317,3 +317,25 @@ KM10, GMM10, FCM10 on all three datasets.
 
 **Reported** (descriptive): mean and minimum agreement per method, and the number of
 replicates in which F-fca-core exceeds each baseline, for robustness and for stability.
+
+---
+
+## Addendum H (2026-10-24): business value of targeting
+
+Written and committed **before** any targeting result was computed. Datasets reused (disclosed);
+methods unchanged.
+
+**Question.** If a marketer contacts only the top-ranked customers, how much of the next 90 days'
+revenue and how many buyers does each representation reach?
+
+**Design.** Same origins, folds and tuned-regularisation models as before; out-of-fold scores for
+C-fca, F-fca-core, F-ctx, logRFM, KM10, GMM10, FCM10 (out-of-fold predictions are saved this time).
+- *Revenue captured at q %*: rank customers by predicted log spend; share of the horizon's total
+  revenue (sum of spend) held by the top q % (q = 10, 20).
+- *Response lift at q %*: rank by predicted purchase probability; purchase rate in the top q %
+  divided by the overall rate (q = 10, 20).
+- *Gain curves*: cumulative revenue share against share of customers contacted, 1 %–100 %.
+
+**Tests.** Primary, per dataset, Holm over four: H1 F-fca-core − C-fca and H2 F-fca-core − FCM10,
+each on revenue captured at 20 % and lift at 20 %; same paired customer bootstrap, mean over origins.
+Descriptive: all other methods and q = 10 %.
