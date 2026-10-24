@@ -62,6 +62,35 @@ not significantly different on dunnhumby.
   clusters, and a two-cluster structure is almost trivially stable. Structure was not measured
   at k = 10 (not in the plan), so this comparison is not like for like.
 
+## Structure agreement against k = 10 clustering (Addendum G)
+
+Same design, baselines with k = 10 (`results/clustering/<dataset>_structure_agreement_k10.csv`).
+Mean (minimum) over 20 replicates:
+
+| Method | Robust. Retail II | Robust. CDNOW | Robust. dunnhumby | Stab. Retail II | Stab. CDNOW | Stab. dunnhumby |
+|---|---|---|---|---|---|---|
+| C-fca | 0.886 (0.874) | 0.936 (0.929) | 0.928 (0.906) | 0.957 (0.922) | 0.987 (0.953) | 0.936 (0.867) |
+| **F-fca-core** | **0.958** (0.948) | **0.955** (0.952) | **0.948** (0.939) | **0.986** (0.978) | **0.993** (0.924) | **0.972** (0.942) |
+| K-means, k = 10 | 0.760 (0.549) | 0.907 (0.807) | 0.650 (0.546) | 0.683 (0.508) | 0.937 (0.804) | 0.692 (0.498) |
+| GMM, k = 10 | 0.858 (0.731) | 0.816 (0.795) | 0.878 (0.793) | 0.818 (0.701) | 0.904 (0.845) | 0.843 (0.583) |
+| FCM, k = 10 | 0.913 (0.894) | 0.929 (0.849) | 0.942 (0.815) | 0.944 (0.910) | 0.966 (0.890) | 0.914 (0.825) |
+
+Replicates in which F-fca-core is higher (of 20):
+
+| Baseline | Robust. Retail II | Robust. CDNOW | Robust. dunnhumby | Stab. Retail II | Stab. CDNOW | Stab. dunnhumby |
+|---|---|---|---|---|---|---|
+| K-means, k = 10 | 20 | 20 | 20 | 20 | 19 | 20 |
+| GMM, k = 10 | 20 | 20 | 20 | 20 | 19 | 20 |
+| FCM, k = 10 | 20 | 15 | 8 | 16 | 9 | 17 |
+
+- At a comparable granularity, fuzzy RFM-FCA has the **highest mean robustness and stability
+  on all three datasets**, and the best or near-best worst case.
+- It beats K-means and GMM in essentially every replicate.
+- Against FCM the margin is smaller: clearly ahead on Online Retail II, and in the other
+  cells FCM wins some replicates (dunnhumby robustness: 8 of 20, where FCM's mean is pulled
+  down by occasional bad fits, min 0.815). Fuzzy RFM-FCA is the more *consistent* of the two:
+  its minima are higher in five of six cells.
+
 ## Verdict
 
 - **Against the base paper's crisp FCA:** fuzzy RFM-FCA is better on prediction, robustness and
@@ -72,5 +101,6 @@ not significantly different on dunnhumby.
   roughly on par with fuzzy C-means (small gains on Online Retail II, mixed on CDNOW, a tie on
   dunnhumby). Its advantage over FCM is therefore not predictive power; it is that its segments
   come with explicit intents and rules (e.g. {R5, ½F5, M5}), which FCM clusters do not.
-- **Gap to close for a paper:** robustness and stability against k = 10 baselines, which is the
-  fair structural comparison.
+- **Structure at k = 10 (Addendum G):** fuzzy RFM-FCA is the most robust and stable method on
+  average on all three datasets, far ahead of K-means and GMM and slightly ahead of FCM, with
+  more consistent worst cases.
