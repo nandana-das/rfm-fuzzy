@@ -9,6 +9,7 @@ from sklearn.metrics import r2_score, roc_auc_score
 
 from rfmfca.fuzzy import (FuzzyConceptLattice, RankScaler, crisp_context, fuzzy_context,
                           tie_aware_fuzzy_context)
+from rfmfca.segmenters import choose_k, log_rfm, segment_features
 
 MIN_SUPPORT = 0.04
 METHODS = ("C-ctx", "C-fca", "F-ctx", "F-fca", "F-fca-G", "logRFM")
@@ -30,6 +31,9 @@ TIE_SPECS = {
 }
 # Plan addendum E: hybrid = segment features + log-RFM.
 HYBRIDS = {"HYB-fca": "F-fca-core", "HYB-ctx": "F-ctx", "HYB-cfca": "C-fca"}
+# Plan addendum F: clustering baselines; k from the training fold's silhouette, or fixed at 10.
+CLUSTERERS = {"KM": ("KM", None), "GMM": ("GMM", None), "FCM": ("FCM", None),
+              "KM10": ("KM", 10), "GMM10": ("GMM", 10), "FCM10": ("FCM", 10)}
 
 
 def _context(kind, ranks, intervals=None):
@@ -48,8 +52,18 @@ def build_features(train_rfm, test_rfm, methods=METHODS, min_support=MIN_SUPPORT
     iv_tr = scaler.transform_intervals(train_rfm) if needs_ties else None
     iv_te = scaler.transform_intervals(test_rfm) if needs_ties else None
     out = {}
+    chosen_k = None
     for m in methods:
-        if m == "C-ctx":
+        if m in CLUSTERERS:
+            algo, k = CLUSTERERS[m]
+            if k is None:
+                if chosen_k is None:
+                    from sklearn.preprocessing import StandardScaler
+                    chosen_k = choose_k(StandardScaler().fit_transform(log_rfm(train_rfm)))
+                k = chosen_k
+            x_tr, x_te = segment_features(algo, train_rfm, test_rfm, k)
+            out[m] = (x_tr, x_te, {"k": k})
+        elif m == "C-ctx":
             out[m] = (crisp_context(u_tr).to_numpy(float), crisp_context(u_te).to_numpy(float), {})
         elif m == "F-ctx":
             out[m] = (fuzzy_context(u_tr).to_numpy(float) / 2, fuzzy_context(u_te).to_numpy(float) / 2, {})
