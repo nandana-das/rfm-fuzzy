@@ -18,5 +18,5 @@ cd paper && pandoc main.tex -f latex -t docx --citeproc --bibliography=refs.bib 
 
 The propositions of `sections/method.tex` are checked numerically in `tests/test_theory.py`.
 
-Still to do before submission: CRediT statement,
+Still to do before submission:
 competing-interests confirmation, cover letter, and a final language edit.

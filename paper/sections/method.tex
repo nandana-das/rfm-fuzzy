@@ -62,7 +62,7 @@ Proposition~\ref{prop:floor} explains the failure of the naive extension: on Onl
 
 The full set of fuzzy segments is about four times larger than the crisp one (Section~\ref{sec:res-interp}). For communication we select $K$ segments. A customer's \emph{explained mass} given a set $S$ of segments is the largest intent size $w_c = \sum_m B_c(m)$ (a full term counts 1, a partial term $\tfrac12$) among segments in $S$ whose core contains the customer, or 0. The objective is
 \begin{equation}
-f(S) = \sum_{g \in G} \max_{c \in S} w_c \,\mathbb{1}\bigl[B_c^{\downarrow}(g) = 1\bigr], \qquad f(\emptyset) = 0,
+f(S) = \sum_{g \in G} \max_{c \in S} w_c \,\mathbf{1}\bigl[B_c^{\downarrow}(g) = 1\bigr], \qquad f(\emptyset) = 0,
 \end{equation}
 maximised greedily under $|S| = K$, with ties broken by larger core support. The selection uses no outcome variable.
 

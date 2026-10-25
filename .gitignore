@@ -4,3 +4,6 @@ __pycache__/
 .pytest_cache/
 # Raw UCI data: fetch with scripts/fetch_data.py (not redistributed here)
 data/raw/
+
+# Overleaf bundle (rebuild with: cd paper && zip -r rfm-fuzzy-overleaf.zip main.tex refs.bib sections tables figures/*.pdf)
+paper/rfm-fuzzy-overleaf.zip
