@@ -8,3 +8,4 @@ data/raw/
 # Overleaf bundle (rebuild with: cd paper && zip -r rfm-fuzzy-overleaf.zip main.tex refs.bib sections tables figures/*.pdf)
 paper/rfm-fuzzy-overleaf.zip
 paper_ieee/rfm-fuzzy-ieee-overleaf.zip
+report/micro-project-report-overleaf.zip

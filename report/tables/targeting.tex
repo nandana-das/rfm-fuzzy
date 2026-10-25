@@ -1,0 +1,20 @@
+\begin{table}[t]
+\centering\small
+\caption{Share of next-90-day revenue (\%) held by the top 10\,\% and 20\,\% of customers ranked by predicted spend (means over four cutoffs).}
+\label{tab:targeting}
+\begin{tabular}{lcccccc}
+\toprule
+ & \multicolumn{3}{c}{Top 10\,\%} & \multicolumn{3}{c}{Top 20\,\%} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Representation & Retail II & CDNOW & dunnhumby & Retail II & CDNOW & dunnhumby \\
+\midrule
+Crisp RFM-FCA (C-fca) & 52.6 & 52.6 & 28.3 & 71.6 & 70.6 & 50.1 \\
+Fuzzy RFM-FCA (F-fca-core) & 55.4 & 53.5 & 30.5 & 71.8 & 70.4 & 50.7 \\
+Fuzzy memberships (F-ctx) & 55.6 & 52.8 & 30.6 & 73.4 & 70.1 & 50.9 \\
+log-RFM & 58.0 & 52.8 & 31.2 & 72.3 & 69.9 & 50.0 \\
+K-means, $k{=}10$ & 54.1 & 51.6 & 28.6 & 70.3 & 68.7 & 48.3 \\
+GMM, $k{=}10$ & 51.2 & 51.2 & 21.7 & 70.1 & 68.0 & 38.7 \\
+FCM, $k{=}10$ & 36.2 & 53.8 & 26.8 & 71.2 & 70.2 & 49.5 \\
+\bottomrule
+\end{tabular}
+\end{table}
