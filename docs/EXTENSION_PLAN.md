@@ -394,3 +394,27 @@ F-sel20, C-sel20, KM10, GMM10, FCM10.
 
 **Interpretability proxies** (full data) as in Addendum I, plus: coverage (share of customers fully in
 ≥ 1 selected concept) and mean explained mass / 3.
+
+---
+
+## Addendum K (2026-10-25): sensitivity analysis
+
+Written and committed **before** any sensitivity result. One factor varied at a time around the
+defaults; everything else as in the main analysis (tuned regularisation, same origins, folds,
+models, bootstrap). Descriptive: no multiplicity correction.
+
+| Factor | Values (default in bold) | Methods compared | Comparison |
+|---|---|---|---|
+| Support threshold (crisp support / fuzzy core support) | 0.02, **0.04**, 0.06 | C-fca, F-fca-core | F-fca-core − C-fca |
+| Membership half-width | 0.15, **0.20**, 0.25 | C-ctx, F-ctx, C-fca, F-fca-core | F-ctx − C-ctx, F-fca-core − C-fca |
+| Prediction horizon (days) | 60, **90**, 180 | C-ctx, F-ctx, C-fca, F-fca-core | F-ctx − C-ctx, F-fca-core − C-fca |
+| Summary size K | 5, **10**, **20**, 30 | F-selK, C-selK | F-selK − C-selK |
+
+Notes fixed in advance: with half-width 0.25 neighbouring terms overlap more and a customer can be
+partly in three terms (memberships no longer sum to 1). For the 180-day horizon only cutoffs whose
+horizon ends within the data are used (Retail II: first three; CDNOW: first three; dunnhumby: the
+cutoffs at days 351, 441 and 531).
+
+**Reported:** for every setting and dataset, the pooled difference on AUC and R² with its 95 %
+bootstrap CI and the number of origins where it is positive; a finding "holds" in a setting when
+its CI excludes zero in the default direction. Also concept counts per setting.
