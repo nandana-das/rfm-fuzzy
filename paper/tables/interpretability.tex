@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering\small
+\caption{Structural interpretability proxies on the full data (Retail II / CDNOW / dunnhumby). Fidelity: F1 between ``satisfies the segment's R/F/M description'' and ``is a member''. Conditions: constrained dimensions per description.}
+\label{tab:interpretability}
+\begin{tabular}{lcccc}
+\toprule
+Representation & Segments & Fidelity (F1) & Conditions & Segments per customer \\
+\midrule
+Crisp RFM-FCA (C-fca) & 51 / 54 / 49 & 1.00 / 1.00 / 1.00 & 1.5 / 1.6 / 1.5 & 5.3 / 6.2 / 5.5 \\
+Fuzzy RFM-FCA (F-fca-core) & 208 / 238 / 215 & 1.00 / 1.00 / 1.00 & 1.8 / 1.9 / 1.8 & 19.5 / 24.0 / 20.9 \\
+K-means, $k{=}10$ & 10 / 10 / 10 & 0.68 / 0.74 / 0.74 & 3.0 / 3.0 / 3.0 & 1.0 / 1.0 / 1.0 \\
+GMM, $k{=}10$ & 10 / 10 / 10 & 0.53 / 0.80 / 0.67 & 3.0 / 3.0 / 3.0 & 1.0 / 1.0 / 1.0 \\
+FCM, $k{=}10$ & 10 / 10 / 10 & 0.66 / 0.71 / 0.73 & 3.0 / 3.0 / 3.0 & 1.0 / 1.0 / 1.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
