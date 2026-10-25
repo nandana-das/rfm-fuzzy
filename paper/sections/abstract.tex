@@ -1,0 +1,15 @@
+\begin{abstract}
+Recency--frequency--monetary (RFM) segmentation with formal concept analysis (FCA) yields segments that are explicitly described and organised in a hierarchy, but its binary context assigns customers on either side of a quintile cut point to disjoint segments although they behave almost identically. We replace the binary RFM context with a fuzzy one and build segments from Bělohlávek fuzzy concepts. Three additions make this work in practice: a core-support threshold that removes the near-universal concepts which the Łukasiewicz residuum otherwise makes frequent, a greedy summary that selects a small set of concepts with a $(1-1/e)$ approximation guarantee, and a tie-aware membership for heavily tied frequencies. We prove that crisp RFM-FCA is a special case and that core support reduces to ordinary support on binary data. We replicate the crisp method of \citet{rungruang2024} and compare against it, against fuzzy memberships alone, log-RFM, and K-means, Gaussian mixture and fuzzy C-means clustering, on three retail datasets with rolling-origin out-of-sample evaluation and analysis plans committed before each analysis. Fuzzy RFM-FCA predicts next-period purchase and spend better than crisp RFM-FCA on all three datasets, with the result holding in 47 of 48 settings of a sensitivity analysis; it reaches more revenue in the top customer decile and gives the most robust and stable segments of all methods compared. It is not a better predictor than log-RFM and is roughly level with fuzzy C-means, but unlike clustering its segments are exactly described by short rules, and it represents the 69--74\,\% of customers who lie near a quintile boundary.
+\end{abstract}
+
+\begin{keyword}
+Customer segmentation \sep RFM \sep Formal concept analysis \sep Fuzzy concept lattice \sep Fuzzy logic \sep Interpretability
+\end{keyword}
+
+\begin{highlights}
+\item Fuzzy RFM context with Bělohlávek fuzzy concepts generalises crisp RFM-FCA.
+\item A core-support threshold removes the near-universal concepts of the Łukasiewicz lattice.
+\item Fuzzy RFM-FCA beats crisp RFM-FCA on three datasets and in 47 of 48 sensitivity settings.
+\item It gives the most stable segments of all methods, with exact rule descriptions.
+\item A greedy 10-concept summary with a $(1-1/e)$ guarantee makes it usable by marketers.
+\end{highlights}

@@ -1,0 +1,45 @@
+\section{Experimental design}\label{sec:design}
+
+\subsection{Datasets}\label{sec:data}
+
+\begin{itemize}
+\item \textbf{Online Retail II} \citep{chen2019uci}: 1,067,371 transaction lines of a UK online gift wholesaler, December 2009 to December 2011; 5,878 customers after the base paper's cleaning. This is the base paper's dataset and was used for replication and method development.
+\item \textbf{CDNOW} \citep{fader2005}: 69,659 purchases by 23,570 customers of an online music retailer who first bought in the first quarter of 1997, observed to June 1998. Between 52 and 65\,\% of customers have a single purchase at the cutoffs used.
+\item \textbf{dunnhumby \emph{The Complete Journey}} \citep{dunnhumby}: 2,595,732 grocery basket lines of 2,500 households over 711 days; 92--93\,\% of households buy in any 90-day window.
+\end{itemize}
+Frequency counts transaction lines and monetary value is total spend, as in the base paper.
+
+\subsection{Protocol}\label{sec:protocol}
+
+We use rolling-origin evaluation \citep{tashman2000}: four cutoffs per dataset, three months apart; features use all transactions before a cutoff and targets the next 90 days. Targets are (a) whether a customer buys (ROC AUC, logistic regression) and (b) log spend (coefficient of determination $R^2$, ridge regression). Within each cutoff we use 5-fold cross-validation; the rank scale, lattice, concept selection and clustering are fitted on the training customers of each fold only, so nothing learned from test customers enters their features. Features are standardised; regularisation is either fixed ($C=1$, $\alpha=1$) or tuned by inner 3-fold cross-validation over $10^{-4},\dots,10^{2}$. Comparisons use a paired customer bootstrap (1,000 resamples within each cutoff) of the metric difference, pooled as the mean over cutoffs \citep{efron1993}, with Holm correction \citep{holm1979} within each pre-specified family.
+
+\subsection{Representations compared}\label{sec:methods}
+
+Each representation is fed to the same models (Table~\ref{tab:methods}). The two context representations isolate the effect of fuzzification; the lattice representations add the concept structure. Clustering baselines are fitted on standardised log-RFM: K-means, a full-covariance Gaussian mixture (GMM) and fuzzy C-means (FCM, fuzzifier 2, k-means++ seeding \citep{arthur2007,bezdek1981}), using one-hot membership, posterior probabilities and membership degrees respectively. The number of clusters is chosen in each training fold by the silhouette criterion over $k = 2,\dots,10$ as in the base paper \citep{rousseeuw1987}; as it selected $k = 2$ in all 60 training folds, we also report $k = 10$, which matches the size of the 10-concept summary.
+
+\begin{table}[t]
+\centering\small
+\caption{Representations compared.}
+\label{tab:methods}
+\begin{tabular}{lll}
+\toprule
+Code & Description & Role \\
+\midrule
+C-ctx & 15 crisp quintile indicators & ablation \\
+C-fca & crisp concepts with support $\ge 0.04$ \citep{rungruang2024} & base method \\
+F-ctx & 15 fuzzy memberships & ablation \\
+F-fca-core & fuzzy concepts with core support $\ge 0.04$ & proposed \\
+F-sel$K$ / C-sel$K$ & $K$ fuzzy / crisp concepts, greedy summary & summary view \\
+log-RFM & $\log(1+R), \log(1+F), \log(1+M)$ & benchmark \\
+KM, GMM, FCM & clustering on log-RFM, silhouette $k$ and $k=10$ & baselines \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Further measures}\label{sec:measures}
+
+\textit{Targeting value}: the share of next-period revenue held by the top 10\,\% and 20\,\% of customers ranked by predicted spend, and the purchase-rate lift in the top 10\,\% and 20\,\% by predicted purchase probability. \textit{Robustness} and \textit{stability}: because concept sets and cluster labels are not directly comparable, we draw 20,000 random customer pairs, compute the cosine similarity of each pair's feature vectors under a reference fit and under a perturbed fit, and report the correlation of the two similarity vectors (1 = identical structure); perturbations are dropping 5\,\% of invoices (robustness) and bootstrap resampling of customers (stability), 20 replicates each. \textit{Structural interpretability}: description fidelity (F1 between satisfying a segment's R/F/M description and being a member; for clusters, the tightest quintile ranges holding 80\,\% of members), description length, number of segments and segments per customer.
+
+\subsection{Pre-registration and staging}\label{sec:prereg}
+
+The analysis plan and eleven addenda were committed to the project repository before the analysis each covers; deviations are listed in the repository. The method was developed on Online Retail II in two stages: the first specification (sigma-count support) failed and motivated core support (Section~\ref{sec:res-dev}). CDNOW and dunnhumby were then analysed once each with the method unchanged under confirmatory plans. Later analyses (clustering baselines, targeting, interpretability, summary, sensitivity) reuse the three datasets with plans committed before each; we label the tie-aware membership and the hybrid analysis as exploratory.

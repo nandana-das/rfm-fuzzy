@@ -38,6 +38,9 @@ and association rules off the concept lattice. Its stated future work is a
   lattice adding signal beyond the memberships and the robustness advantage do **not** hold here.
   See [docs/DUNNHUMBY_RESULTS.md](docs/DUNNHUMBY_RESULTS.md).
 
+- [x] **Manuscript draft** in [paper/](paper/) (LaTeX, `elsarticle`), with theory propositions checked in
+  `tests/test_theory.py` and all tables/figures generated from `results/`.
+
 ## Layout
 
 ```
