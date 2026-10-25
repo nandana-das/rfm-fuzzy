@@ -4,8 +4,8 @@ Everything that is learned from data (rank scale, lattice, frequent concepts)
 is fitted on the training customers only and then applied to the test customers.
 """
 import numpy as np
-import pandas as pd
 from sklearn.metrics import r2_score, roc_auc_score
+from sklearn.preprocessing import StandardScaler
 
 from rfmfca.fuzzy import (FuzzyConceptLattice, RankScaler, crisp_context, fuzzy_context, select_concepts,
                           tie_aware_fuzzy_context)
@@ -61,7 +61,6 @@ def build_features(train_rfm, test_rfm, methods=METHODS, min_support=MIN_SUPPORT
             algo, k = CLUSTERERS[m]
             if k is None:
                 if chosen_k is None:
-                    from sklearn.preprocessing import StandardScaler
                     chosen_k = choose_k(StandardScaler().fit_transform(log_rfm(train_rfm)))
                 k = chosen_k
             x_tr, x_te = segment_features(algo, train_rfm, test_rfm, k)

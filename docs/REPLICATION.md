@@ -1,7 +1,7 @@
 # Replication of the base paper
 
 **Base paper:** Rungruang, C., Riyapan, P., Intarasit, A., Chuarkham, K., Muangprathub, J.
-*RFM Model Customer Segmentation Based on Hierarchical Approach Using FCA.* Preprint, SSRN 4416218.
+*RFM model customer segmentation based on hierarchical approach using FCA.* Expert Systems with Applications 237 (2024) 121449 (replicated from the preprint, SSRN 4416218).
 
 **Data:** UCI Online Retail II, 1 Dec 2009 – 9 Dec 2011, 1,067,371 rows.
 
