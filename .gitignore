@@ -9,3 +9,11 @@ data/raw/
 paper/rfm-fuzzy-overleaf.zip
 paper_ieee/rfm-fuzzy-ieee-overleaf.zip
 report/micro-project-report-overleaf.zip
+
+# Manuscripts and reports are kept outside the repository
+paper/
+paper_ieee/
+report/
+scripts/make_paper_tables.py
+scripts/make_ieee_tables.py
+scripts/make_paper_figures.py

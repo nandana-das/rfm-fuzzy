@@ -1,4 +1,5 @@
-"""Numerical checks of the propositions in paper/sections/theory.tex."""
+"""Numerical checks of the theoretical properties of fuzzy RFM-FCA (special case, core support,
+Łukasiewicz floor, greedy summary guarantee, tie-aware partition)."""
 import itertools
 
 import numpy as np
