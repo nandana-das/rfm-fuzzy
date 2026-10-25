@@ -42,7 +42,7 @@ The binary context has a cost, named as future work in \cite{rungruang2024}: cus
 
 \section{Related Work}
 
-RFM summarises purchase history and is a sufficient input for lifetime-value projection under standard models \cite{fader2005}; segmentation commonly applies K-means to RFM \cite{chen2012}. Fuzzy RFM work softens the inputs or the assignment: Carrasco et al.\ \cite{carrasco2019} use 2-tuple fuzzy linguistic RFM scores before K-means, and Marín Díaz \cite{marindiaz2025} clusters RFM with fuzzy C-means \cite{bezdek1981} plus explainable-AI post-processing. In both, segments remain clusters without exact descriptions or order. FCA is widely used for knowledge discovery \cite{poelmans2013app,singh2016}; concept explosion is handled by support or stability pruning \cite{kuznetsov2007}, and rules are read along lattice covers \cite{luxenburger1991}. Fuzzy FCA generalises the incidence relation to a residuated lattice \cite{burusco1994,pollandt1997,belohlavek2002}; its surveys stress the much larger number of concepts \cite{poelmans2014,alwersh2022}. To our knowledge fuzzy concepts have not been used for RFM segmentation, and RFM-FCA has not been evaluated out of sample or against clustering on several datasets.
+RFM summarises purchase history and is a sufficient input for lifetime-value projection under standard models \cite{fader2005}; segmentation commonly applies K-means to RFM scores or values \cite{chen2012}, with hierarchical clustering and Gaussian mixtures as alternatives \cite{wedel2000}. Cluster-based segments are described only by centroids and must be labelled after the fact. Fuzzy RFM work softens the inputs or the assignment: Carrasco et al.\ \cite{carrasco2019} use 2-tuple fuzzy linguistic RFM scores before K-means, and Marín Díaz \cite{marindiaz2025} clusters RFM with fuzzy C-means \cite{bezdek1981} plus explainable-AI post-processing. In both, segments remain clusters without exact descriptions or order. FCA is widely used for knowledge discovery \cite{poelmans2013app,singh2016}; concept explosion is handled by support or stability pruning \cite{kuznetsov2007}, and rules are read along lattice covers \cite{luxenburger1991}. Rungruang et al.\ \cite{rungruang2024} applied FCA to quintile RFM scores and compared the lattice with K-means and hierarchical clustering by cluster-validity indices on Online Retail II. Fuzzy FCA generalises the incidence relation to a residuated lattice \cite{burusco1994,pollandt1997,belohlavek2002}; its surveys stress the much larger number of fuzzy concepts and the need for concept reduction \cite{poelmans2014,alwersh2022}, which we address with core support and a summary with a guarantee. To our knowledge fuzzy concepts have not been used for RFM segmentation, and RFM-FCA has not been evaluated out of sample or against clustering on several datasets.
 
 \section{Method}
 
@@ -76,10 +76,16 @@ $\mathrm{cs}(B)=|\{g:B^{\downarrow}(g)=1\}|/|G|$. Fuzzy RFM-FCA keeps concepts w
 \begin{proposition}\label{prop:core}
 For any residuated implication, $B^{\downarrow}(g)=1$ iff $B\le\tilde I(g,\cdot)$; hence core support is residuum-free, anti-monotone in $B$ (frequent intents form a down-set) and equal to support on binary data.
 \end{proposition}
+\begin{proof}
+In a residuated lattice $a\to b=1$ iff $a\le b$, and a meet over a chain is 1 iff every term is. If $B_1\le B_2\le\tilde I(g,\cdot)$ then $B_1\le\tilde I(g,\cdot)$. The binary case follows with Proposition~\ref{prop:special}(ii).
+\end{proof}
 
 \begin{proposition}\label{prop:floor}
 Under Łukasiewicz logic $B^{\downarrow}(g)\ge1-\max_m B(m)$, so every intent with all degrees $\le\tfrac12$ has sigma-count support $\ge\tfrac12$.
 \end{proposition}
+\begin{proof}
+$\min(1,1-a+b)\ge1-a$, so the meet over $m$ is at least $1-\max_m B(m)$; averaging over $g$ bounds the sigma-count.
+\end{proof}
 
 Proposition~\ref{prop:floor} explains why the naive extension fails: on Online Retail II, 2,649 of 3,841 Łukasiewicz concepts pass a sigma-count support of 0.04, dominated by intents such as $\{\tfrac12F1,\tfrac12F2,\tfrac12M1,\tfrac12M2\}$. Core support cuts them to 208.
 
@@ -91,8 +97,14 @@ f(S)=\textstyle\sum_{g}\max_{c\in S} w_c\,\mathbf{1}[B_c^{\downarrow}(g)=1],
 where $w_c=\sum_m B_c(m)$ is intent size; no outcome is used.
 
 \begin{proposition}\label{prop:greedy}
-$f$ is monotone submodular (a facility-location function), so greedy selection is within $1-1/e$ of the optimum \cite{nemhauser1978}.
+$f$ is monotone submodular, so greedy selection is within $1-1/e$ of the optimum \cite{nemhauser1978}.
 \end{proposition}
+\begin{proof}
+For each $g$, $S\mapsto\max_{c\in S}a_{gc}$ with $a_{gc}\ge0$ is monotone and submodular (a facility-location term); non-negative sums preserve both properties.
+\end{proof}
+
+\subsection{Tie-aware memberships}
+When many customers share a value, e.g.\ the one-time buyers of CDNOW, the mid-rank puts the whole block at one point. A tied block occupying the rank interval $[l,r]$ instead receives $\bar\mu_k=\frac{1}{r-l}\int_l^r\mu_k(u)\,\mathrm{d}u$, its expected membership under a uniform position within the block; by linearity $\sum_k\bar\mu_k=1$, and untied customers are unchanged.
 
 All propositions are also verified numerically in the accompanying test suite.
 
@@ -103,6 +115,8 @@ All propositions are also verified numerically in the accompanying test suite.
 \textbf{Protocol.} Rolling origin \cite{tashman2000} with four cutoffs per dataset; features from history, targets over the next 90 days: purchase (ROC AUC, logistic regression) and log spend ($R^2$, ridge). Within each cutoff, 5-fold cross-validation; rank scale, lattice, summary and clusters are fitted on training customers only. Regularisation is tuned by inner cross-validation. Differences are tested by a paired customer bootstrap pooled over cutoffs \cite{efron1993} with Holm correction \cite{holm1979}.
 
 \textbf{Representations.} C-ctx / F-ctx: 15 crisp / fuzzy memberships (ablations); C-fca: crisp lattice \cite{rungruang2024}; F-fca-core: ours; log-RFM; K-means, Gaussian mixture (GMM) and fuzzy C-means (FCM, k-means++ seeding \cite{arthur2007}) on log-RFM. The base paper's silhouette rule \cite{rousseeuw1987} chose $k=2$ in all 60 folds, so we report $k=10$.
+
+\textbf{Further measures.} Targeting: share of next-period revenue held by the top 10\,\% and 20\,\% of customers ranked by predicted spend. Robustness and stability: correlation of 20,000 customer-pair cosine similarities between a reference fit and a fit after dropping 5\,\% of invoices or bootstrapping customers (20 replicates each; 1 = identical structure), which applies equally to concepts and clusters. Interpretability: description fidelity (F1 between satisfying a segment's R/F/M description and membership; for clusters the tightest quintile ranges holding 80\,\% of members), conditions per description and segments per customer.
 
 \textbf{Pre-registration.} An analysis plan and eleven addenda were committed to the repository before each analysis. The method was developed on Online Retail II; CDNOW and dunnhumby served as confirmation with the method unchanged.
 
@@ -115,19 +129,27 @@ All propositions are also verified numerically in the accompanying test suite.
 
 \textbf{Development and confirmation.} The first specification, with sigma-count support, failed as Proposition~\ref{prop:floor} predicts (AUC 0.733 vs 0.781 for crisp); core support fixed it. On CDNOW all seven pre-registered claims replicated; on dunnhumby four did (fuzzy memberships and lattice beat their crisp counterparts), while the lattice adding spend signal beyond the fuzzy memberships and the robustness claims did not. We therefore do not claim the latter two.
 
-\textbf{Prediction} (Tables~\ref{tab:prediction}, \ref{tab:comparisons}). On all three datasets, fuzzy memberships beat crisp scores (0.005--0.008 AUC, 0.008--0.014 $R^2$) and fuzzy RFM-FCA beats crisp RFM-FCA (0.004--0.010 AUC, 0.009--0.012 $R^2$). It beats K-means ($k=10$) in five of six cells and GMM in four, and is roughly level with FCM. With $k=2$ every clustering baseline trails by 0.018--0.181 AUC. No segmentation beats log-RFM overall, which keeps the exact values; adding fuzzy concept degrees to log-RFM still raises spend $R^2$ by 0.020 (Online Retail II) and 0.015 (CDNOW).
+\textbf{Prediction} (Tables~\ref{tab:prediction}, \ref{tab:comparisons}). On all three datasets, fuzzy memberships beat crisp scores (0.005--0.008 AUC, 0.008--0.014 $R^2$) and fuzzy RFM-FCA beats crisp RFM-FCA (0.004--0.010 AUC, 0.009--0.012 $R^2$). It beats K-means ($k=10$) in five of six cells and GMM in four, and is roughly level with FCM. With $k=2$ every clustering baseline trails by 0.018--0.181 AUC. No segmentation beats log-RFM overall, because log-RFM keeps the exact values that segments compress: it is best on dunnhumby AUC and CDNOW $R^2$, while fuzzy RFM-FCA is best on Online Retail II $R^2$. In an exploratory hybrid, adding fuzzy concept degrees to log-RFM raises spend $R^2$ by 0.020 (Online Retail II) and 0.015 (CDNOW), but not purchase AUC, so the segments carry information beyond the exact values.
 
 \input{tables/targeting}
 
-\textbf{Targeting} (Table~\ref{tab:targeting}). Ranking by fuzzy RFM-FCA reaches 0.9--2.9 percentage points more of next-period revenue in the top decile than crisp RFM-FCA on every dataset ($p\le0.01$), and more than K-means and GMM at both depths. FCM is mostly level but fails on the Online Retail II top decile (36.2\,\% vs 55.4\,\%).
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/gain_curves.pdf}
+\caption{Cumulative share of next-90-day revenue against the share of customers contacted, ranked by predicted spend (means over four cutoffs).}
+\label{fig:gain}
+\end{figure*}
+
+\textbf{Targeting} (Table~\ref{tab:targeting}, Fig.~\ref{fig:gain}). Ranking by fuzzy RFM-FCA reaches 0.9--2.9 percentage points more of next-period revenue in the top decile than crisp RFM-FCA on every dataset ($p\le0.01$), and more than K-means and GMM at both depths. FCM is mostly level but fails on the Online Retail II top decile (36.2\,\% vs 55.4\,\%). Of twelve pre-registered tests at 20\,\% depth (against crisp RFM-FCA and FCM, revenue and lift), three are significant, all in favour of fuzzy RFM-FCA.
 
 \input{tables/structure}
 
-\textbf{Robustness and stability} (Table~\ref{tab:structure}). Agreement is the correlation of 20,000 customer-pair similarities between a reference and a perturbed fit (5\,\% of invoices dropped, or customers bootstrapped; 20 replicates). Fuzzy RFM-FCA has the highest mean on every dataset, beats crisp RFM-FCA in all robustness replicates and K-means and GMM in essentially all; against FCM the margin is small, but its worst case is better in all six cells.
+\textbf{Robustness and stability} (Table~\ref{tab:structure}). Fuzzy RFM-FCA has the highest mean on every dataset, beats crisp RFM-FCA in all robustness replicates and K-means and GMM in essentially all; against FCM the margin is small, but its worst case is better in all six cells.
 
 \input{tables/interpretability}
 
-\textbf{Interpretability} (Table~\ref{tab:interpretability}). FCA segments are exactly described by their intents in fewer than two conditions, whereas the tightest R/F/M description of a cluster disagrees with its membership for 20--47\,\% of customers. The cost is about four times as many segments as crisp FCA, and mean rule confidence is slightly lower (e.g.\ 0.71 vs 0.73), although individual rules sharpen: $\{R5,M5\}\Rightarrow\{R5,F5,M5\}$ has confidence 0.81 crisp, while $\{R5,M5\}\Rightarrow\{R5,\tfrac12F5,M5\}$ has 0.92. The 10-concept greedy summary leaves each customer in one or two segments; on Online Retail II it includes $\{F5,M5\}$ (10.3\,\% of customers, 55.3\,\% of spend) and $\{R5,F5,M5\}$ (4.8\,\%, 36.9\,\%). It beats the 10-concept crisp summary on all datasets (AUC $+0.005$ to $+0.026$) and is far more stable, but predicts worse than FCM with ten clusters (AUC $-0.005$ to $-0.047$).
+\textbf{Interpretability} (Table~\ref{tab:interpretability}). FCA segments are exactly described by their intents in fewer than two conditions, whereas the tightest R/F/M description of a cluster disagrees with its membership for 20--47\,\% of customers. The cost is about four times as many segments as crisp FCA, and mean rule confidence is slightly lower (e.g.\ 0.71 vs 0.73), although individual rules sharpen: $\{R5,M5\}\Rightarrow\{R5,F5,M5\}$ has confidence 0.81 crisp, while $\{R5,M5\}\Rightarrow\{R5,\tfrac12F5,M5\}$ has 0.92. \input{tables/summary_view}
+The 10-concept greedy summary (Table~\ref{tab:summaryview}) leaves each customer in one or two segments; on Online Retail II it includes $\{F5,M5\}$ (10.3\,\% of customers, 55.3\,\% of spend) and $\{R5,F5,M5\}$ (4.8\,\%, 36.9\,\%). It beats the 10-concept crisp summary on all datasets (AUC $+0.005$ to $+0.026$) and is far more stable, but predicts worse than FCM with ten clusters (AUC $-0.005$ to $-0.047$).
 
 \input{tables/sensitivity}
 
@@ -140,9 +162,13 @@ All propositions are also verified numerically in the accompanying test suite.
 
 \textbf{Sensitivity} (Table~\ref{tab:sensitivity}, Fig.~\ref{fig:sens}). Varying the support threshold (0.02--0.06, i.e.\ about 140--500 fuzzy segments), membership width (0.15--0.25) and horizon (60--180 days), fuzzy RFM-FCA beats crisp RFM-FCA significantly in 47 of 48 cells and is never worse.
 
+\textbf{Tie-aware memberships (exploratory).} On CDNOW, 41 fuzzy rules merely restate the tie of one-time buyers (e.g.\ $\{\tfrac12F2\}\Rightarrow\{F2\}$ with confidence 1). Tie-aware memberships remove all 41 and raise the bootstrap stability of the segment set from 0.908 (worst case 0.524) to 0.963 (worst case 0.920), with unchanged predictions; on the other datasets they change at most 0.8\,\% of customers.
+
 \section{Discussion and Conclusion}
 
-Fuzzifying the RFM context consistently improves on crisp quintiles, both as attributes and as concept lattices, on three datasets and across all parameter settings, with the gain concentrated in the most valuable decile, and it yields the most stable segment structure of the methods compared. The limits are equally clear: segments compress the data, so log-RFM is at least as accurate for pure prediction; most of the predictive gain comes from the fuzzy memberships rather than the lattice; accuracy is roughly level with fuzzy C-means; and the full lattice has about four times as many segments as the crisp one. We therefore recommend the full fuzzy lattice for modelling and targeting and the 10-concept summary for communicating segments. Limitations: effect sizes are small (0.004--0.010 AUC), interpretability was measured by structural proxies rather than with marketers, the later analyses reuse the same three datasets, and only retail data and a three-level truth scale were studied.
+Fuzzifying the RFM context consistently improves on crisp quintiles, both as attributes and as concept lattices, on three datasets and across all parameter settings, with the gain concentrated in the most valuable decile, and it yields the most stable segment structure of the methods compared. The limits are equally clear: segments compress the data, so log-RFM is at least as accurate for pure prediction; most of the predictive gain comes from the fuzzy memberships rather than the lattice; accuracy is roughly level with fuzzy C-means; and the full lattice has about four times as many segments as the crisp one. We therefore recommend the full fuzzy lattice for modelling and targeting and the 10-concept summary for communicating segments.
+
+Limitations: (i) effect sizes over crisp RFM-FCA are small (0.004--0.010 AUC) and on small datasets the fuzzy lattice needs tuned regularisation; (ii) interpretability was measured by structural proxies, not with marketers; (iii) the method was developed on Online Retail II and later analyses reuse the same three datasets; (iv) only triangular memberships, a three-level truth scale and retail data were studied. Future work should test the segments with marketers and extend the truth scale and the application domains.
 
 \section*{Data and Code Availability}
 Online Retail II and CDNOW are public; dunnhumby data are available from the provider. Code, analysis plans and aggregate results: \url{https://github.com/nandana-das/rfm-fuzzy}.
